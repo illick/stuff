@@ -1,0 +1,277 @@
+%%[/*<div style="display:none">*/
+
+SET @SpiritsPref = LOOKUP("DepartmentPreference_Spirits", "EmailAddress", "EmailAddress", @SubscriberEmail)
+SET @WDOffer = Lookup("20241212_Promo_Flash_HOLIDAYFLASH_WDOffer","HybrisPromotionId","LoyaltyCardNumber", @loyaltyNum) 
+SET @SDOffer = Lookup("20241212_Promo_Flash_HOLIDAYFLASH_SDOffer","HybrisPromotionId","LoyaltyCardNumber", @loyaltyNum) 
+SET @WDOfferID = Lookup("20241212_Promo_Flash_HOLIDAYFLASH_WDOffer","OfferId","LoyaltyCardNumber", @loyaltyNum) 
+SET @SDOfferID = Lookup("20241212_Promo_Flash_HOLIDAYFLASH_SDOffer","OfferId","LoyaltyCardNumber", @loyaltyNum) 
+SET @DisclaimerEndDate = "12/16/2024"
+
+IF NOT EMPTY(@SpiritsPref) AND @CanGetSpirits AND @StoreState != "MI" THEN
+  /* ============================= ========================== ===================== */
+  /* -------------------------- Spirits Offer First -------------------------- */
+  /* ============================= ========================== ===================== */
+
+  IF @LTAStore AND @StoreState != "CT" AND (@SDOffer == "LTA_FLASH_2022_05_10PCT_2ORMORESD" OR @SDOffer == "LTA_FLASH_2022_06_10PCT_MIX2_SD") THEN
+    IF @StoreState == "TX" THEN
+      SET @image1 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/469ac957-ab50-4413-a6f4-d45529ac7272.jpg"
+      SET @alt1 = "10% OFF Mix 2 or more Spirits Direct&reg; spirits."
+    ELSE
+      SET @image1 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/4c76a46e-bd95-4fc3-a0fa-9379e51aaa1a.jpg"
+      SET @alt1 = "10% OFF Mix 2 or more Spirits Direct&reg; spirits."
+    ENDIF
+
+    
+    IF IndexOf(@SDOffer,"LTA_QUOTIENT_CB") != 0 THEN
+      set @link1 = "https://totalwine.onelink.me/uqDX/46848d5d?%%=v(@web_tracking)=%%&af_ad=%%=v(@campaign)=%%"
+    ELSE
+      set @hash = SHA256(CONCAT(@LoyaltyNum,@SDOfferID,"GRAPEVINE"))
+      set @link1 = CONCAT("https://totalwine.onelink.me/uqDX/46848d5d?OfferID=", @SDOfferID, "&LoyaltyID=", @LoyaltyNum, "&hash=", @hash, "&af_ad=", @campaign, "&", @web_tracking)
+    ENDIF     
+     
+     IF @WDOffer == "LTA_FLASH_2022_05_20PCT_3ORMOREWD" THEN
+      SET @image2 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/adfab756-da95-4f48-b991-bd3ef0638154.jpg"
+      SET @alt2 = "20% OFF Mix 3 or more Winery Direct&reg; wines."
+    ELSEIF @WDOffer == "LTA_FLASH_2022_05_20PCT_6ORMOREWD" THEN
+      SET @image2 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/0aebfcc0-0980-4915-b5f4-60792d4c75c1.jpg"
+      SET @alt2 = "20% OFF Mix 6 or more Winery Direct&reg; wines."
+    ELSEIF @WDOffer == "LTA_FLASH_2022_05_20PCT_9ORMOREWD" THEN
+      SET @image2 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/eb6f5308-6891-463f-a31d-f62a7c1b49a2.jpg"
+      SET @alt2 = "20% OFF Mix 9 or more Winery Direct&reg; wines."
+    ELSEIF @WDOffer == "LTA_FLASH_2022_06_20PCT_MIX9_WD" THEN
+      SET @image2 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/eb6f5308-6891-463f-a31d-f62a7c1b49a2.jpg"
+      SET @alt2 = "20% OFF Mix 9 or more Winery Direct&reg; wines."
+    ELSEIF @WDOffer == "LTA_FLASH_2022_05_20PCT_12ORMOREWD" THEN
+      SET @image2 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/1a2440f9-5f10-4462-8826-d8e37fc3c4da.jpg"
+      SET @alt2 = "20% OFF Mix 12 or more Winery Direct&reg; wines."
+    ELSEIF @WDOffer == "LTA_FLASH_2024_12_15OFF_75WD_2" THEN
+      SET @image2 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/979a1718-f790-4a27-925c-164827a35fa9.jpg"
+      SET @alt2 = "$15 OFF 5 Days Only! Save $15 off your purchase of $75 or more on 750ml and 1.5L Winery Direct&reg; Wines."
+    ELSE
+      SET @error_message = "Invalid WD Offer - Spirits first"
+      InsertDE("RaiseError_log", "content_name", @content, "email", @SubscriberEmail, "error_message", @error_message)
+      RaiseError(@error_message, true)
+    ENDIF
+    
+   IF IndexOf(@WDOffer,"LTA_QUOTIENT_CB") != 0 THEN
+      set @link2 = "https://totalwine.onelink.me/uqDX/46848d5d?%%=v(@web_tracking)=%%&af_ad=%%=v(@campaign)=%%"
+    ELSE
+      set @hash = SHA256(CONCAT(@LoyaltyNum,@WDOfferID,"GRAPEVINE"))
+      set @link2 = CONCAT("https://totalwine.onelink.me/uqDX/46848d5d?OfferID=", @WDOfferID, "&LoyaltyID=", @LoyaltyNum, "&hash=", @hash, "&af_ad=", @campaign, "&", @web_tracking)
+    ENDIF 
+    
+   SET @SubjectLine = "⚡️ FLASH OFFER: 10% off Spirits + 20% off Wine – Limitations Apply, See Details Inside"
+   SET @disclaimer1 = 'Some limitations apply. Offer details can be found <a href="%%=redirectto(@link1)=%%" style="color:#282828;">here</a>.'
+   VAR @disclaimer2
+
+
+  ELSEIF @LTAStore AND @StoreState != "CT" THEN /* LTA without valid offer */
+    SET @error_message = "Invalid SD Offer - Spirits first"
+    InsertDE("RaiseError_log", "content_name", @content, "email", @SubscriberEmail, "error_message", @error_message)
+    RaiseError(@error_message, true)
+  
+  ELSE /* Default */
+    SET @image1 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/7e767db8-af44-4e26-bf66-6fbe62640be4.jpg"
+    SET @alt1 = "10% OFF Mix 2 or more Spirits Direct&reg; spirits."
+    SET @link1 = "https://totalwine.onelink.me/uqDX/uedy7bxu?%%=v(@web_tracking)=%%&af_ad=%%=v(@campaign)=%%"
+    
+    IF @StoreState == "CT" THEN
+      SET @disclaimer1 = "Savings automatically applied in cart. Valid on 750ml or larger Spirits Direct® spirits. Valid in CT only. Valid on items with retail price less than $499.99. Cannot be combined with any other Total Wine & More discount. Good through %%=v(@DisclaimerEndDate)=%%."
+    ELSE
+      SET @disclaimer1 = "Savings automatically applied in cart. Valid on 750ml or larger Spirits Direct® spirits. Valid in KY, MA, WI, IN, TX, Alpharetta and Kennesaw, GA stores only. Valid on items with retail price less than $499.99. Cannot be combined with any other Total Wine & More discount. Good through %%=v(@DisclaimerEndDate)=%%."
+    ENDIF
+    
+    SET @image2 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/a8338b55-2aa5-483a-9f64-e67751e968b6.jpg"
+    SET @alt2 = "15% OFF Mix 8 or more Winery Direct&reg; wines."
+    SET @link2 = "https://totalwine.onelink.me/uqDX/qgjyqdwl?%%=v(@web_tracking)=%%&af_ad=%%=v(@campaign)=%%"    
+    
+    IF @StoreState == "CT" THEN
+      SET @disclaimer2 = "Savings automatically applied in cart. Valid in store & online. Valid on 750ml and 1.5L Winery Direct® wines. Valid in CT only. Valid only on items with prices ending in 8. Cannot be combined with any other Total Wine & More discount. Good through %%=v(@DisclaimerEndDate)=%%."
+    ELSE
+      SET @disclaimer2 = "Savings automatically applied in cart. Valid in store & online. Valid on 750ml and 1.5L Winery Direct® wines. Valid in GA, KY, MA, IN, WI and TX only. Excludes items with prices ending in 7. Cannot be combined with any other Total Wine & More discount. Good through %%=v(@DisclaimerEndDate)=%%."
+    ENDIF
+    
+    SET @SubjectLine = "⚡️ FLASH OFFER: 10% off Spirits + 15% off Wine – Limitations Apply, See Details Inside"
+
+  ENDIF
+
+
+ELSEIF @CanGetSpirits AND @StoreState != "MI" THEN
+/* ============================= ========================== ===================== */
+/* -------------------------- Wine first, then Spirits -------------------------- */
+/* ============================= ========================== ===================== */
+
+  IF @LTAStore AND @StoreState != "CT" THEN
+    IF @WDOffer == "LTA_FLASH_2022_05_20PCT_3ORMOREWD" THEN
+      SET @Image1 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/ac316980-493b-4b58-acfd-d8c9f42668d4.jpg"
+      SET @Alt1 = "20% OFF Mix 3 or more Winery Direct&reg; wines."
+    ELSEIF @WDOffer == "LTA_FLASH_2022_05_20PCT_6ORMOREWD" THEN
+      SET @Image1 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/cfaa8799-480d-40d9-82de-36aa670e3c57.jpg"
+      SET @Alt1 = "20% OFF Mix 6 or more Winery Direct&reg; wines."
+    ELSEIF @WDOffer == "LTA_FLASH_2022_05_20PCT_9ORMOREWD" THEN
+      SET @Image1 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/9ae3ebdc-96fd-4fb8-9111-d3884b5dd18b.jpg"
+      SET @Alt1 = "20% OFF Mix 9 or more Winery Direct&reg; wines."
+    ELSEIF @WDOffer == "LTA_FLASH_2022_06_20PCT_MIX9_WD" THEN
+      SET @Image1 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/e07417c2-4ae8-4a25-8dd8-e271373ed060.jpg"
+      SET @Alt1 = "20% OFF Mix 9 or more Winery Direct&reg; wines."  
+    ELSEIF @WDOffer == "LTA_FLASH_2022_05_20PCT_12ORMOREWD" THEN
+      SET @Image1 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/96396961-043a-4fd7-9532-952d299236fe.jpg"
+      SET @Alt1 = "20% OFF Mix 12 or more Winery Direct&reg; wines."
+    ELSEIF @WDOffer == "LTA_FLASH_2024_12_15OFF_75WD_2" THEN
+      SET @Image1 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/979a1718-f790-4a27-925c-164827a35fa9.jpg"
+      SET @Alt1 = "$15 OFF $75 or more of Winery Direct&reg; Wines."
+    ELSE
+      SET @error_message = "Invalid WD Offer - Wine First"
+      InsertDE("RaiseError_log", "content_name", @content, "email", @SubscriberEmail, "error_message", @error_message)
+      RaiseError(@error_message, true)
+    ENDIF
+    
+    IF IndexOf(@WDOffer,"LTA_QUOTIENT_CB") != 0 THEN
+      set @link1 = "https://totalwine.onelink.me/uqDX/46848d5d?%%=v(@web_tracking)=%%&af_ad=%%=v(@campaign)=%%"
+    ELSE
+      set @hash = SHA256(CONCAT(@LoyaltyNum,@WDOfferID,"GRAPEVINE"))
+      set @link1 = CONCAT("https://totalwine.onelink.me/uqDX/46848d5d?OfferID=", @WDOfferID, "&LoyaltyID=", @LoyaltyNum, "&hash=", @hash, "&af_ad=", @campaign, "&", @web_tracking)
+    ENDIF
+    
+    SET @disclaimer1 = 'Some limitations apply. Offer details can be found <a href="%%=redirectto(@link1)=%%" style="color:#282828;">here</a>.'
+    IF @CanGetSpirits AND (@SDOffer == "LTA_FLASH_2022_05_10PCT_2ORMORESD" OR @SDOffer == "LTA_FLASH_2022_06_10PCT_MIX2_SD") THEN
+      SET @image2 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/be90b110-1836-4928-9725-f4ccd90445c0.jpg"
+      SET @Alt2 = "10% OFF Mix 2 or more Spirits Direct&reg; spirits."
+      
+      IF IndexOf(@SDOffer,"LTA_QUOTIENT_CB") != 0 THEN
+        set @link2 = "https://totalwine.onelink.me/uqDX/46848d5d?%%=v(@web_tracking)=%%&af_ad=%%=v(@campaign)=%%"
+      ELSE
+        set @hash = SHA256(CONCAT(@LoyaltyNum,@SDOfferID,"GRAPEVINE"))
+        set @link2 = CONCAT("https://totalwine.onelink.me/uqDX/46848d5d?OfferID=", @SDOfferID, "&LoyaltyID=", @LoyaltyNum, "&hash=", @hash, "&af_ad=", @campaign, "&", @web_tracking)
+      ENDIF     
+      
+      SET @cta2 = "Activate deal"
+      SET @disclaimer2 = ""
+
+      SET @SubjectLine = "⚡️ FLASH OFFER: 20% off Wine + 10% off Spirits – Limitations Apply, See Details Inside"
+
+    ELSE
+      VAR @Offer2, @suboffer2, @image2, @link2, @cta2, @disclaimer2
+
+      SET @SubjectLine = "⚡️ FLASH OFFER: 20% off Wine – Limitations Apply, See Details Inside"
+
+    ENDIF
+  ELSE
+    SET @image1 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/21dc2cf3-d826-4973-9298-1c1822bce1ca.jpg"
+    SET @alt1 = "15% OFF Mix 8 or more Winery Direct&reg; wines."
+    SET @link1 = "https://totalwine.onelink.me/uqDX/qgjyqdwl?%%=v(@web_tracking)=%%&af_ad=%%=v(@campaign)=%%"
+    
+    IF @StoreState == "CT" THEN
+      SET @disclaimer1 = "Savings automatically applied in cart. Valid in store & online. Valid on 750ml and 1.5L Winery Direct® wines. Valid in CT only. Valid only on items with prices ending in 8. Cannot be combined with any other Total Wine & More discount. Good through %%=v(@DisclaimerEndDate)=%%."
+    ELSE
+      SET @disclaimer1 = "Savings automatically applied in cart. Valid in store & online. Valid on 750ml and 1.5L Winery Direct® wines. Valid in GA, KY, MA, IN, WI and TX only. Excludes items with prices ending in 7. Cannot be combined with any other Total Wine & More discount. Good through %%=v(@DisclaimerEndDate)=%%."
+    ENDIF
+    SET @image2 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/4f31a539-275f-4e8e-9c7c-163af20f03c8.jpg"
+    SET @alt2 = "10% OFF Mix 2 or more Spirits Direct&reg; spirits."
+    SET @link2 = "https://totalwine.onelink.me/uqDX/uedy7bxu?%%=v(@web_tracking)=%%&af_ad=%%=v(@campaign)=%%"
+
+    IF @StoreState == "CT" THEN
+      SET @disclaimer2 = "Savings automatically applied in cart. Valid on 750ml or larger Spirits Direct® spirits. Valid in CT only. Valid on items with retail price less than $499.99. Cannot be combined with any other Total Wine & More discount. Good through %%=v(@DisclaimerEndDate)=%%."
+    ELSE
+      SET @disclaimer2 = "Savings automatically applied in cart. Valid on 750ml or larger Spirits Direct® spirits. Valid in KY, MA, WI, IN, TX, Alpharetta and Kennesaw, GA stores only. Valid on items with retail price less than $499.99. Cannot be combined with any other Total Wine & More discount. Good through %%=v(@DisclaimerEndDate)=%%."
+    ENDIF
+
+    SET @SubjectLine = "⚡️ FLASH OFFER: 15% off Wine + 10% off Spirits – Limitations Apply, See Details Inside"
+
+  ENDIF
+
+
+ELSE
+/* ============================= ================== ============== */
+/* -------------------------- Wine Only -------------------------- */
+/* ============================= ================== ============== */
+
+  IF @LTAStore AND @StoreState != "CT" THEN
+    IF @WDOffer == "LTA_FLASH_2022_05_20PCT_3ORMOREWD" THEN
+      SET @Image1 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/ac316980-493b-4b58-acfd-d8c9f42668d4.jpg"
+      SET @Alt1 = "20% OFF Mix 3 or more Winery Direct&reg; wines."
+    ELSEIF @WDOffer == "LTA_FLASH_2022_05_20PCT_6ORMOREWD" THEN
+      SET @Image1 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/cfaa8799-480d-40d9-82de-36aa670e3c57.jpg"
+      SET @Alt1 = "20% OFF Mix 6 or more Winery Direct&reg; wines."
+    ELSEIF @WDOffer == "LTA_FLASH_2022_05_20PCT_9ORMOREWD" THEN
+      SET @Image1 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/9ae3ebdc-96fd-4fb8-9111-d3884b5dd18b.jpg"
+      SET @Alt1 = "20% OFF Mix 9 or more Winery Direct&reg; wines."
+    ELSEIF @WDOffer == "LTA_FLASH_2022_06_20PCT_MIX9_WD" THEN
+      SET @Image1 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/e07417c2-4ae8-4a25-8dd8-e271373ed060.jpg"
+      SET @Alt1 = "20% OFF Mix 9 or more Winery Direct&reg; wines."  
+    ELSEIF @WDOffer == "LTA_FLASH_2022_05_20PCT_12ORMOREWD" THEN
+      SET @Image1 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/96396961-043a-4fd7-9532-952d299236fe.jpg"
+      SET @Alt1 = "20% OFF Mix 12 or more Winery Direct&reg; wines."
+    ELSEIF @WDOffer == "LTA_FLASH_2024_12_15OFF_75WD_2" THEN
+      SET @Image1 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/979a1718-f790-4a27-925c-164827a35fa9.jpg"
+      SET @Alt1 = "$15 OFF $75 or more of Winery Direct&reg; Wines."
+    ELSE
+      SET @error_message = "Invalid WD Offer - Wine First"
+      InsertDE("RaiseError_log", "content_name", @content, "email", @SubscriberEmail, "error_message", @error_message)
+      RaiseError(@error_message, true)
+    ENDIF
+    
+    IF IndexOf(@WDOffer,"LTA_QUOTIENT_CB") != 0 THEN
+      set @link1 = "https://totalwine.onelink.me/uqDX/46848d5d?%%=v(@web_tracking)=%%&af_ad=%%=v(@campaign)=%%"
+    ELSE
+      set @hash = SHA256(CONCAT(@LoyaltyNum,@WDOfferID,"GRAPEVINE"))
+      set @link1 = CONCAT("https://totalwine.onelink.me/uqDX/46848d5d?OfferID=", @WDOfferID, "&LoyaltyID=", @LoyaltyNum, "&hash=", @hash, "&af_ad=", @campaign, "&", @web_tracking)
+    ENDIF
+    
+    IF @StoreState == "MI" THEN
+      SET @disclaimer1 = 'Valid in store & online. Valid on 750ml and 1.5L Winery Direct® wines. Valid in MI only. Excludes items with prices ending in 7. Cannot be combined with any other Total Wine & More discount. Good through %%=v(@DisclaimerEndDate)=%%. <br /><br />Some limitations apply. Offer details can be found <a href="%%=redirectto(@link1)=%%" style="color:#282828;">here</a>.'
+    ELSE
+      SET @disclaimer1 =  'Some limitations apply. Offer details can be found <a href="%%=redirectto(@link1)=%%" style="color:#282828;">here</a>.'
+    ENDIF
+    VAR @Offer2, @suboffer2, @image2, @link2, @cta2, @disclaimer2
+
+    IF @StoreState == "MI" THEN
+      SET @SubjectLine = "⚡️ FLASH OFFER: $15 off Wine – Limitations Apply, See Details Inside"
+    ELSE
+      SET @SubjectLine = "⚡️ FLASH OFFER: 20% off Wine – Limitations Apply, See Details Inside"
+    ENDIF
+
+  ELSE
+    SET @image1 = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/21dc2cf3-d826-4973-9298-1c1822bce1ca.jpg"
+    SET @alt1 = "15% OFF Mix 8 or more Winery Direct&reg; wines."
+    SET @link1 = "https://totalwine.onelink.me/uqDX/qgjyqdwl?%%=v(@web_tracking)=%%&af_ad=%%=v(@campaign)=%%"
+
+    IF @StoreState == "CT" THEN
+      SET @disclaimer1 = "Savings automatically applied in cart. Valid in store & online. Valid on 750ml and 1.5L Winery Direct® wines. Valid in CT only. Valid only on items with prices ending in 8. Cannot be combined with any other Total Wine & More discount. Good through %%=v(@DisclaimerEndDate)=%%."
+    ELSE
+      SET @disclaimer1 = "Savings automatically applied in cart. Valid in store & online. Valid on 750ml and 1.5L Winery Direct® wines. Valid in GA, KY, MA, IN, WI and TX only. Excludes items with prices ending in 7. Cannot be combined with any other Total Wine & More discount. Good through %%=v(@DisclaimerEndDate)=%%."
+    ENDIF
+
+    SET @SubjectLine = "⚡️ FLASH OFFER: 15% off Wine – Limitations Apply, See Details Inside"
+
+
+    VAR @Offer2, @suboffer2, @image2, @link2, @cta2, @disclaimer2
+  ENDIF
+ENDIF
+
+
+
+/*</div>*/]%% 
+
+
+<a href="%%=redirectto(@link1)=%%" border="0">
+  <img src="%%=v(@image1)=%%" height="auto" width="600" style="width:100%;display:block;padding:0px;text-align:center;font-size:35px;line-height:40px;color:#383838;" title="%%=v(@alt1)=%%" alt="%%=v(@alt1)=%%" border="0">
+</a>
+%%[IF NOT EMPTY(@image2) THEN]%%                  
+<a href="%%=redirectto(@link2)=%%" border="0">
+  <img src="%%=v(@image2)=%%" height="auto" width="600" style="width:100%;display:block;padding:0px;text-align:center;font-size:35px;line-height:40px;color:#383838;" title="%%=v(@alt2)=%%" alt="%%=v(@alt2)=%%" border="0">
+</a>
+%%[ENDIF]%%                  
+                  
+
+                  
+%%[If NOT EMPTY(@Disclaimer1) THEN]%%
+<p style="font-family:'Source Sans Pro', Arial, Sans-Serif;padding:0;margin:20px 20px 0;font-size:13px;font-weight:400;line-height:15px;color:#282828;text-align:left;">
+      %%=treatascontent(@disclaimer1)=%%
+    </p> 
+%%[ENDIF]%%
+%%[If NOT EMPTY(@Disclaimer2) THEN]%%
+<p style="font-family:'Source Sans Pro', Arial, Sans-Serif;padding:0;margin:10px 20px 0;font-size:13px;font-weight:400;line-height:15px;color:#282828;text-align:left;">
+      %%=treatascontent(@disclaimer2)=%%
+    </p>                   
+%%[ENDIF]%%

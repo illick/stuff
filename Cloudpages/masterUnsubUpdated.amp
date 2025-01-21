@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>Manage Subscriptions</title>
+  <meta https-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta name='description' content=''>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <!--<link rel="stylesheet" type="text/css" href="https://image.exct.net/lib/fecc157071620079/m/1/main_landing.css" media="screen" />-->
+  <style type='text/css'>
+    * {
+      box-sizing: border-box;
+    }
+
+    /* Style the body */
+    body {
+      font-family: Arial;
+      margin: 0;
+      height: 100%;
+      background-color:#efefef;
+
+    }
+
+    html {
+      height: 100%;
+    }
+
+    .headline {
+      flex: 100%;
+      text-align: center;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 30px;
+      font-weight: 600;
+      line-height: auto;
+      color: #282828;
+    }
+
+    .header {
+      padding: 0px 20px 0px 20px;
+      display: flex;
+      align-content: center;
+      background-color: #007F73;
+      height: 60px;
+      width:100%;
+      max-width:800px;
+      margin:0 auto;
+
+    }
+    
+    #main {
+      width:100%;
+      max-width:800px;
+      margin:0 auto;
+      background-color: #ffffff;
+      padding:20px;
+    }
+
+    .header img {
+      align-self: center;
+      margin-left: auto;
+      margin-right: auto;
+
+    }
+
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      align-content: center;
+      padding: 0 20px 0 20px;
+      width:100%;
+      max-width:800px;
+      margin:0 auto;
+      background-color:#ffffff;
+    }
+
+    .form-container {
+      flex: 100%;
+      padding: 20px;
+      background-color: #fff;
+      align-items: center;
+      min-height: 80%;
+    }
+
+
+    .button {
+      color: #000000;
+      padding: 8px 15px;
+      text-align: center;
+      text-decoration: none;
+      font-size: 12px;
+      cursor: pointer;
+      align-self: center;
+    }
+
+    .button a {
+      color: #ffffff;
+      text-decoration: none !important;
+    }
+
+    button a: visited {
+      color: #ffffff;
+    }
+    
+    input.button {
+      padding:7px 15px;
+      background-color:#007F73;
+      color:#ffffff;
+      border:1px solid #007f73;
+      border-radius:2px;
+      font-size:18px;
+    }
+    
+    .errorcodes {
+      display:none
+    }
+
+    /* Style the top navigation bar */
+    .navbar {
+      display: flex;
+      background-color: #f4f7f9;
+      border: 1px solid #b4bac1;
+      padding-left: 120px;
+      padding-right: 120px;
+    }
+
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      vertical-align: bottom;
+      background-color: #3a4249;
+      padding-left: 120px;
+      padding-right: 120px;
+      color: #ffffff;
+      font-size: 13px;
+    }
+
+    .footer a,
+      {
+      padding: 14px 20px;
+      text-decoration: none;
+      text-align: center;
+      color: #ffffff;
+    }
+
+    .headline-text {
+      padding: 0 20px 0 20px;
+      margin: 0;
+      font-size: 22px;
+      color: #000000;
+      font-weight: 700;
+      text-align: center;
+    }
+
+
+
+    .intro-text {
+      margin: 0;
+      padding: 10px 20px 0 20px;
+      color: #000000;
+      text-align: left;
+      font-size: 15px;
+      text-align: center;
+      line-height: 18px;
+    }
+
+    .sub-callout {
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .form {
+      list-style-type: none;
+      padding: 20px 0px 30px 0px;
+      margin: 0;
+    }
+
+    .form li {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: flex-start;
+      line-height: 22px;
+      padding-top: 5px;
+    }
+
+    .form p {
+      font-size: 14px;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+
+    }
+  </style>
+  <style media='screen' type='text/css'>
+    @media screen and (max-width: 700px) {
+
+      .main-container,
+      .navbar {
+        flex-direction: column;
+      }
+
+      .headline-text {
+        padding: 5px 10px 5px 10px;
+        text-align: left;
+      }
+
+      .intro-text {
+        padding: 5px 10px 5px 10px;
+        text-align: left;
+
+      }
+
+      .sub-callout {
+        text-align: left;
+
+      }
+
+    }
+  </style>
+  <style type="text/css">
+    div.content img {
+      border: 0 !important;
+      padding: 0 !important;
+      margin: 7px 16px 0 0;
+    }
+
+    #formcontent {
+      padding: 20px;
+      font-size: 12px !important;
+      background: #ffffff;
+    }
+
+    #formcontent div {
+      margin: 6px 0 2px 0 !important;
+    }
+
+    #formcontent td {
+      padding: 3px;
+      font-size: 12px !important;
+    }
+
+    .labelright label {
+      float: right;
+    }
+
+    #formcontent table {
+      float: none !important;
+    }
+
+    form#mainform {
+      width: 665px;
+    }
+
+    .content {
+      padding-bottom: 10px !important;
+    }
+
+    .tabblock {
+      background: #fff !important;
+    }
+
+    #formcontent {
+      padding: 20px;
+      font-size: 12px !important;
+      background: #fff;
+    }
+
+    #formcontent div {
+      margin: 6px 0 2px 0 !important;
+    }
+
+    #formcontent td {
+      padding: 3px;
+      font-size: 12px !important;
+    }
+
+    .labelright label {
+      float: right;
+    }
+
+    #formcontent table {
+      float: none !important;
+    }
+
+    form#mainform {
+      width: 665px;
+    }
+
+    .content {
+      padding-bottom: 10px !important;
+    }
+
+    .tabblock {
+      background: #fff !important;
+    }
+
+    .button {
+      float: left;
+    }
+
+    .tabcontainer {
+      background: none;
+    }
+
+    .shipstate {
+      display: none;
+    }
+  </style>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css?family=Playfair+Display:600|Source+Sans+Pro:400');
+  </style>
+
+</head>
+
+<body>
+
+  <div class="header">
+    <img src="https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/bfe4f94b-e2dd-4b01-8597-d9fdcc22151f.png" alt="" style="height:60px; width:auto; ">
+  </div>
+
+  %%[ 
+/*<div style="display:none;">*/
+
+SET @status = REQUESTPARAMETER("__executionContext")
+
+IF @status == "Post" THEN
+
+  VAR @sub, @attr, @list, @statusCode, @statusMsg, @subKey, @errorCode, @email, @output, @temp, @lid, @url, @store, @date_added
+
+  set @lid = [Loyalty ID]
+  set @date_added = FormatDate(date_added, "MM/DD/YYYY")
+  set @store = PreferredStore
+  SET @errorStatus = "false"
+  set @subkey = _subscriberkey
+  SET @email = emailaddr
+
+  IF EMPTY(@subKey) THEN 
+    SET @subKey = REQUESTPARAMETER("sub_key") 
+  ENDIF
+
+  IF NOT EMPTY(@subKey) THEN
+
+    SET @sub = CreateObject("Subscriber")
+    SetObjectProperty(@sub, "SubscriberKey", @subKey)
+    SetObjectProperty(@sub, "EmailAddress", @email)
+
+    SET @attr = CreateObject("Attribute")
+    SetObjectProperty(@attr, "Name", "Offers")
+    IF EMPTY(RequestParameter("Offers")) THEN
+      SetObjectProperty(@attr, "Value", "Y")
+    ELSE
+      SetObjectProperty(@attr, "Value", "N")
+    ENDIF
+    AddObjectArrayItem(@sub, "Attributes", @attr)
+
+    SET @attr = CreateObject("Attribute")
+    SetObjectProperty(@attr, "Name", "Events")
+    IF EMPTY(RequestParameter("Events")) THEN
+      SetObjectProperty(@attr, "Value", "Y")
+    ELSE
+      SetObjectProperty(@attr, "Value", "N")
+    ENDIF
+    AddObjectArrayItem(@sub, "Attributes", @attr)
+
+    SET @statusCode1 = InvokeCreate(@sub, @statusMsg1, @errorCode1)
+
+    IF @statusCode1 != "OK" AND @errorCode1 == 12014 THEN
+      /* They already exist on all subs */
+      SET @statusCode2 = InvokeUpdate(@sub, @statusMsg2, @errorCode2)
+      
+      IF @statusCode2 != "OK" AND @errorCode2 == 13006 THEN
+        SetObjectProperty(@list, "Action", "update")
+        SET @statusCode3 = InvokeUpdate(@sub, @statusMsg3, @errorCode3)
+      ENDIF
+    ENDIF
+
+    IF @statusCode1 == "OK" OR @statusCode2 == "OK" THEN
+    /*success*/
+    ELSE
+      SET @errorStatus = "true"
+    ENDIF
+
+    IF NOT EMPTY(RequestParameter("Unsubscribe")) THEN
+
+      VAR @mu_sub, @mu_subkey, @mu_statusCode, @mu_statusMsg, @mu_errorCode
+
+      SET @mu_subkey = @subkey
+      SET @mu_sub = CreateObject("Subscriber")
+      IF NOT EMPTY(@mu_subkey) THEN
+        SetObjectProperty(@mu_sub, "SubscriberKey", @mu_subkey)
+      ENDIF
+      SetObjectProperty(@mu_sub, "Status", "Unsubscribed")
+      SET @subscriberUpdated = "unsubscribed"
+
+      SET @mu_statusCode = InvokeUpdate(@mu_sub, @mu_statusMsg, @mu_errorCode)
+
+      IF @mu_statusCode != "OK" THEN
+        SET @errorStatus = "true"
+      ENDIF
+
+      SET @jobid = REQUESTPARAMETER("jobid")
+      SET @listid = REQUESTPARAMETER("listid")
+
+      /* Log Unsub Event */
+      SET @lue = CreateObject("ExecuteRequest")
+      SetObjectProperty(@lue,"Name","LogUnsubEvent")
+
+      SET @lue_prop = CreateObject("APIProperty")
+      SetObjectProperty(@lue_prop, "Name", "SubscriberKey")
+      SetObjectProperty(@lue_prop, "Value", @subkey)
+      AddObjectArrayItem(@lue, "Parameters", @lue_prop)
+
+      SET @lue_prop = CreateObject("APIProperty")
+      SetObjectProperty(@lue_prop, "Name", "JobID")
+      SetObjectProperty(@lue_prop, "Value", @jobid)
+      AddObjectArrayItem(@lue, "Parameters", @lue_prop)
+
+      SET @lue_prop = CreateObject("APIProperty")
+      SetObjectProperty(@lue_prop, "Name", "ListID")
+      SetObjectProperty(@lue_prop, "Value", @listid)
+      AddObjectArrayItem(@lue, "Parameters", @lue_prop)
+
+      SET @lue_prop = CreateObject("APIProperty")
+      SetObjectProperty(@lue_prop, "Name", "Reason")
+      SetObjectProperty(@lue_prop, "Value", "Custom Unsubscribe Page")
+      AddObjectArrayItem(@lue, "Parameters", @lue_prop)
+
+      SET @lue_statusCode = InvokeExecute(@lue, @overallStatus, @requestId)
+
+      SET @Response = Row(@lue_statusCode, 1)
+      SET @Status = Field(@Response,"StatusMessage")
+      SET @Error = Field(@Response,"ErrorCode")
+
+      IF (@Error == "12012") OR (@Error == "401") OR (@Status == "Event posted") THEN
+      /* Succeeded */
+      ELSE
+        /* @errorStatus = "true" */
+        /* not catching errors for failed logging */
+      ENDIF
+    ENDIF
+  ELSE
+    SET @errorStatus = "true"
+  ENDIF
+
+IF @errorStatus == "true" THEN
+/*</div>*/
+  ]%%
+
+  <div id="container" style="padding:0;margin:0;">
+    <div id="main">
+      <div id="tabscontent">
+        <div id="tab-1" class="tabouter">
+          <div class="tabcontainer">
+            <div class="tabblock">
+              <div class="topcontainer">
+                <p style="text-align:center;margin:20px;">
+                  An error has occurred while attempting to update your subscriptions.
+                </p>
+              </div>
+              <div class="errorcodes" style="background-color:#dddddd;padding:5px;">
+                <p style="text-align:center;margin:10px;font-family:monospace;font-size:10px;">
+                  Error codes:
+                <p style="text-align:center;margin:10px;font-family:monospace;font-size:10px;">
+                  SUB: %%=v(@sub)=%%<br />
+                  Status Code 1: %%=v(@statusCode1)=%%<br />
+                  Error Code 1: %%=v(@Code1)=%%<br />
+                  Status Code 2: %%=v(@statusCode2)=%%<br />
+                  Error Code 2: %%=v(@Code2)=%%<br />
+                  Status Code 3: %%=v(@statusCode3)=%%<br />
+                  Error Code 3: %%=v(@Code3)=%%<br />
+                  MU Status: %%=v(@mu_statusCode)=%%<br />
+                  LUE Status: %%=v(@lue_statusCode)=%%<br />
+                  Loyalty: %%=v(@lid)=%%<br />
+                  Date: %%=v(@date_added)=%%<br />
+                  PrefStore: %%=v(@store)=%%<br />
+                  ErrorStatus: %%=v(@errorStatus)=%%<br />
+                  SubscriberKey: %%=v(@subkey)=%%<br />
+                  Email: %%=v(@email)=%%<br />
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  %%[
+  ELSE
+
+  set @url = concat('https://web.email-totalwine.com/emailconfirmation/?LID=',@lid,'&DA=',@date_added,'&PS=', @store)
+  redirect(@url)
+
+
+  ENDIF
+
+  ELSE
+  ]%%
+
+  <div class='main-container'>
+
+    <div class="content">
+
+    
+
+    <div id="formcontent" class='form-container'>
+      <p class="headline-text"> Update Email Preferences </p>
+
+      <p class="intro-text">Choose from the options below to update your email subscription.<br>
+        <span class="sub-callout">Rewards members: changing your email preferences may prevent you from getting invitations to special events or certain benefits.</span>
+      </p>
+      <form method="post" action="%%=CloudPagesURL(2572)=%%">
+
+        <ul class='form'>
+          <p>Please remove me from:</p>
+          <li>
+            <!-- %%[ IF Offers == "Y" THEN SET @checked = "" ELSE SET @checked = "checked" ENDIF ]%% -->
+            <input type="checkbox" name="Offers" %%=V(@checked)=%% />
+            &nbsp;<label><strong>Promotions and Offers</strong>&nbsp; (special promotions, offers, featured items, etc.)</label>
+
+          </li>
+
+
+          <li>
+            <!-- %%[ IF Events == "Y" THEN SET @checked = "" ELSE SET @checked = "checked" ENDIF ]%% -->
+            <input type="checkbox" name="Events" %%=V(@checked)=%% />
+            &nbsp;<label><strong>Events and News</strong>&nbsp; (tasting and educational events, exclusive dinners, producer visits, etc.)</label>
+
+          </li>
+          <p>or, to be removed completely from our email list:</p>
+
+          <li>
+            <input type="checkbox" name="Unsubscribe" />
+            &nbsp;<label> <strong>Unsubscribe from all emails</strong><i style="font-size: 13px;">&nbsp;Note: This includes $5 rewards certificates and monthly &More perk emails.</i></label>
+          </li>
+        </ul>
+
+
+        <input type="submit" class="button" value="Update" />
+        <br/>
+        &nbsp;
+        <span style="display: none;" id="post_code"></span>
+
+
+        <input type="hidden" name="__executionContext" id="__executionContext" value="Post" />
+        <input type="hidden" name="sub_key" id="sub_key" value="%%_subscriberkey%%" />
+        <input type="hidden" name="Email Address" id="Email Address" value="%%emailaddr%%" />
+        <input type="hidden" name="PriceZone" id="PriceZone" value="%%PriceZone%%" />
+        <input type="hidden" name="PreferredStore" id="PreferredStore" value="%%PreferredStore%%" />
+        <input type="hidden" name="jobid" value="%%jobid%%" />
+        <input type="hidden" name="listid" value="%%listid%%" />
+
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+  %%[
+  ENDIF
+
+  ]%%
+
+</body>
+
+</html>

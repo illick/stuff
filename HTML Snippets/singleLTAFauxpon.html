@@ -1,0 +1,121 @@
+%%[
+/*<div style="display:none">*/
+/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
+/* THIS SNIPPET DOES NOT PROTECT AGAINST EXPIRED OR NOT STARTED OFFERS - BE SURE TO DOUBLE CHECK BEFORE SEND */
+/* = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
+
+SET @HybrisPromotionID = "PLACEHOLDER"
+
+set @rows = LookupOrderedRows("LTA_OFFERS_IMPORT",0,"DisplayOrder Asc","LoyaltyCardNumber", @LoyaltyNum, "HybrisPromotionId", @HybrisPromotionID)
+set @ExpirationDate = LOOKUP("LTA_OFFERS_IMPORT", "ExpirationDate", "LoyaltyCardNumber", @LoyaltyNum, "HybrisPromotionId", @HybrisPromotionID)
+set @VisibleStartDate = LOOKUP("LTA_OFFERS_IMPORT", "VisibleStartDate", "LoyaltyCardNumber", @LoyaltyNum, "HybrisPromotionId", @HybrisPromotionID)
+set @OfferStatus = LOOKUP("LTA_OFFERS_IMPORT", "OfferStatus", "LoyaltyCardNumber", @LoyaltyNum, "HybrisPromotionId", @HybrisPromotionID)
+set @store = LOOKUP("LTA_OFFERS_IMPORT", "store", "LoyaltyCardNumber", @LoyaltyNum, "HybrisPromotionId", @HybrisPromotionID)
+set @ExpirationDateShort = FormatDate(@ExpirationDate,"s")
+set @Offer = Lookup("Load_to_Account_Promotion_Info","offer","hybris_code", @HybrisPromotionId)
+set @Offer_details = Lookup("Load_to_Account_Promotion_Info","Offer_details","hybris_code", @HybrisPromotionId)
+set @item_code = Lookup("Load_to_Account_Promotion_Info","item_code","hybris_code", @HybrisPromotionId)
+SET @Item_Image = Lookup("HybrisImageURLs_Target","Image_140x196","ItemCode",@item_code)
+SET @httpsItemImage = Replace(@Item_Image,'http','https')
+set @offer_type = Lookup("Load_to_Account_Promotion_Info","offer_type","hybris_code", @HybrisPromotionId)
+set @get_offer_link = "https://totalwine.onelink.me/uqDX/46848d5d?af_ad=%%=v(@campaign)=%%&%%=v(@web_tracking)=%%"
+set @shop_now_link = Lookup("Load_to_Account_Promotion_Info","link","hybris_code", @HybrisPromotionId)
+IF IndexOf(@shop_now_link,'?') > 0 then
+  Set @shop_now_link = CONCAT(@shop_now_link,'&',@web_tracking)
+ELSE
+  Set @shop_now_link = CONCAT(@shop_now_link,'?',@web_tracking)
+ENDIF
+set @provided_image = Lookup("Load_to_Account_Promotion_Info","offer_image_URL","hybris_code", @HybrisPromotionId)
+IF @ItemCode != "" AND NOT EMPTY(@item_code) THEN
+  set @offer_image = @httpsItemImage
+  set @image_width = '120'
+ELSEIF @provided_image != "" AND NOT EMPTY(@provided_image) THEN
+  set @offer_image = @provided_image
+  set @image_width = '140'
+ELSE
+  set @offer_image = Lookup("LTA_offer_images","image_URL","offer_type",@offer_type)
+  set @image_width = '140'
+ENDIF
+SET @itemSLYT = Replace(@Offer,'Yellow Tag!','')
+IF @offer_opt_out == 0 AND @LTAStore == 'TRUE' AND @StoreState != 'MI' AND ROWCOUNT(@rows) > 0 AND NOT Empty(@Offer) AND @ExpirationDate >= NOW() AND (@OfferStatus=='active' OR @OfferStatus=='eligible') AND IndexOf(@HybrisPromotionId,"LTA_MI_") == 0 AND @StoreState != 'MI' AND @store==@ETPreferredStore THEN
+
+IF @StoreState == 'TX' THEN
+  set @SubjectLine = @LTATXSubjectLine
+ELSE
+  set @SubjectLine = @LTASubjectLine
+ENDIF
+/*</div>*/
+]%%
+<table cellspacing="0" cellpadding="0" border="0" width="600" class="container" align="center">
+  <tr>
+    <td style="padding:10px 0 0;">
+      <table style="background-color : #FFFFFF;font-size : 16px; font-family : arial,helvetica,sans-serif; line-height : 1; color : #808080; " cellspacing="0" cellpadding="0" bgcolor="#FFFFFF" width="100%">
+        <tr>
+          <td align="center" valign="top">
+            <table cellpadding="0" cellspacing="0" border="0" width="620" align="center" style="width:100%;">
+              <tr>
+                <td style="padding:10px;border:0px;">
+                  <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; border:dashed 1px #000000;">
+                    <tr>
+                      <td>
+                        <table cellpadding="0" cellspacing="0" border="0" style="width:100%;">
+                          <tr>
+                            <td align="center" valign="center" style="width: 40px;padding:10px;background-color:#efefef;font-family:'Source Sans Pro', Arial, sans-serif;"><img src="https://image.email-totalwine.com/lib/fecc157071620079/m/30/fef7c5f4-d596-40ea-82fa-0852dacabb3e.png" width="30" style="width:30px; display: inline-block;"></td>
+                            <td align="left" valign="center" style="padding:10px;background-color:#efefef;font-family:'Source Sans Pro', Arial, sans-serif;font-size:18px;font-weight:bold;line-height:1em;color:#282828;">%%=Propercase(Replace(@offer,"¬Æ","®"))=%%</td>
+                          </tr>
+                        </table>
+                        <table cellpadding="0" cellspacing="0" border="0" style="width:100%;direction:rtl;">
+                          <tr>
+                            <td align="center" valign="middle" class="responsive-td" style="padding: 5px 10px 10px 10px; direction:ltr;">
+                              <img src="%%=v(@offer_image)=%%" width="140" style="width:%%=v(@image_width)=%%; margin:0 auto;">
+                            </td>
+                            <td align="left" valign="middle" class="responsive-td" style="padding: 0px 10px 10px 10px; direction:ltr;">
+                              <p style="font-family:'Source Sans Pro', Arial, sans-serif; padding:0; margin:10px; font-size:14px;line-height:130%;color:#282828;"><a href="#" target="_blank" style="text-decoration: none;color:#000000;">Valid in-store and online through %%=v(@ExpirationDateShort)=%%</a></p>
+                              <p style="font-family:'Source Sans Pro', Arial, sans-serif; padding:0; margin:10px; font-size:18px;line-height:130%;color:#282828;">%%=Replace(@offer_details,"¬Æ","®")=%%</p>
+                              <table width="100%" border="0" cellspacing="0" cellpadding="0" style="width:100%; height:auto">
+                                <tr>
+                                  %%[IF @OfferStatus == 'eligible' THEN]%%
+                                  <td align="left" style="padding: 10px 10px 0px 10px;">
+                                    <table border="0" cellspacing="0" cellpadding="0" class="buttonholder">
+                                      <tr>
+                                        <td align="center" class="button" style="padding:13px 25px;-webkit-border-radius: 3px;border-radius:3px;" bgcolor="#007F73"><a class="fallback-body" href="%%=redirectto(@get_offer_link)=%%" target="_blank" style="font-size: 18px; font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif; text-decoration: none; color: #ffffff; border: 0px solid #007F73; display: inline-block;font-weight:500;">Activate Deal</a></td>
+                                      </tr>
+                                    </table>
+                                  </td>
+                                  %%[ELSE]%%
+                                  <td align="left" style="padding: 10px 10px 0px 10px;">
+                                    <table border="0" cellspacing="0" cellpadding="0" class="buttonholder">
+                                      <tr>
+                                        <td align="center" class="button" style="padding:13px 25px;-webkit-border-radius: 3px;border-radius:3px;" bgcolor="#007F73"><a class="fallback-body" href="%%=redirectto(@shop_now_link)=%%" target="_blank" style="font-size: 18px; font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif; text-decoration: none; color: #ffffff; border: 0px solid #007F73; display: inline-block;font-weight:500;">Shop Now</a></td>
+                                      </tr>
+                                    </table>
+                                  </td>
+                                  %%[ENDIF]%%
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="" class="responsive-td">
+                        <table cellpadding="0" cellspacing="0" border="0" style="width:100%;">
+                          <tr>
+                            <td bgcolor="#ffffff" align="left" valign="middle" style="font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif; font-size: 14px; color:#000000; padding: 0px 10px 10px 10px;">&#42;Some limitations apply. Offer details can be found <a href="https://www.totalwine.com/offers/coupons?%%=v(@web_tracking)=%%" style="color:#000000;" mc-deep-link="false">here</a>.
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+%%[ENDIF]%%

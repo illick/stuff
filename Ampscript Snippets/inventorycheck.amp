@@ -1,0 +1,11 @@
+%%[/*<div style="display:none;">*/
+SET @WOTMItemCode = 346543750
+SET @inv = Lookup("EDAP_ItemStore_RealTimeInventory", "Inventory", "STORE_KEY",@ETPreferredStore,"ITEM_CODE",@WOTMItemCode)
+set @rows = LookupRows("EDAP_ItemStore_RealTimeInventory", "STORE_KEY",@ETPreferredStore,"ITEM_CODE",@WOTMItemCode)
+set @rowCount = rowcount(@rows)
+IF @inv <= 12 OR @rowCount == 0 THEN
+  SET @error_message = "Low Inventory, cannot send email"
+  InsertDE("RaiseError_log", "content_name", @content, "email", @SubscriberEmail, "error_message", @error_message)
+  RaiseError(@error_message, true)
+ENDIF
+/*</div>*/]%%

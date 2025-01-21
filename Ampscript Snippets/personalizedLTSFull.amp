@@ -1,0 +1,362 @@
+
+%%[
+SET @LoyaltyID = LookUp("sendable_subscribers", "Loyalty Number", "SubscriberKey", @SubscriberKey)
+SET @SubCatPref = LookUp("SubcatPreference_Step3_GoToSubcatAssignment", "Subcategory", "loyaltyNumber", @LoyaltyID)
+SET @SubCatPrefCategory = LookUp("LTSMasterLookupNB", "Department", "varietal", @SubCatPref)
+SET @ExtraWineVarietalName = Lookup("Varietal_FriendlyNames", "CasualName", "Varietal", @WineSubCatPref)
+SET @WineSubCatPref = LookUp("WineSubcatPreference_Step3_GoToSubcatAssignment", "Subcategory", "loyaltyNumber", @LoyaltyID)
+SET @SpiritsSubCatPref = LookUp("SpiritsSubcatPreference_Step3_GoToSubcatAssignment", "Subcategory", "loyaltyNumber", @LoyaltyID)
+
+
+SET @PersonalizedHero = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/cdc3966e-1095-40f8-843e-b2e8dae1d60d.jpg"
+SET @NonPersonalizedHero = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/c3c27277-b24f-4eed-b27c-8e19bcfe1fc8.jpg"
+SET @sendlogDE = "20240815_Promo_LTS_PersonalizedLTS_SendLog"
+
+
+SET @HasBoughtList = "has_bought_current_LTSItems_30daysto1yr"
+
+VAR @ItemString
+SET @ItemCount = 0
+
+/* Starting with item matches, most recently purchased first */
+SET @ItemRows = LookupOrderedRows(@HasBoughtList,7,"TransactionDate Desc","SubscriberKey", @SubscriberKey)
+SET @ItemrowCount = ROWCOUNT(@ItemRows)
+IF @ItemRowCount > 0 THEN
+  FOR @i = 1 TO @ItemRowCount DO
+    SET @row = Row(@ItemRows,@i)
+    SET @ItemCode = Field(@row,"ItemCode")
+    SET @Inventory = LookUp("EDAP_ItemStore_RealTimeInventory","INVENTORY","ITEM_CODE",@ItemCode,"STORE_KEY", @ETPreferredStore)
+    SET @WasPrice = LookUp("LTSMasterLookupNB", "EDLP", "ItemCode", @ItemCode)
+    SET @NewPrice = LookUp("EDAP_ItemStore_RealTimeInventory","Price","ITEM_CODE",@ItemCode,"STORE_KEY",@ETPreferredStore)
+    IF @Inventory >= 6 AND NOT EMPTY(@WasPrice) AND @WasPrice > @NewPrice THEN
+      IF EMPTY(@ItemString) THEN
+        SET @ItemString = @ItemCode
+        SET @ItemName = LOOKUP("EDAP_Item", "Item_Name", "Item_Code", @ItemCode)
+        SET @SubjectItemName = trim(@ItemName)
+      ELSE
+        SET @ItemString = CONCAT(@ItemString, "|", @ItemCode)
+      ENDIF
+      SET @ItemCount = ADD(@ItemCount, 1)
+    ELSE
+    ENDIF
+  NEXT @i
+ENDIF
+
+/* Filling with first preference */
+SET @VarietalCount = 0
+IF @ItemCount < 7 THEN
+  SET @NeedToFill = Subtract(7,@ItemCount)
+  SET @VarietalRows = LookupOrderedRows("LTSMasterLookupNB",@NeedToFill,"Discount Desc","Varietal",@SubCatPref,"StoreKey",@ETPreferredStore)
+  SET @VarietalrowCount = ROWCOUNT(@VarietalRows)
+  IF @VarietalRowCount > 0 THEN
+    FOR @j = 1 TO @VarietalRowCount DO
+      SET @row = Row(@VarietalRows,@j)
+      SET @ItemCode = Field(@row,"ItemCode")
+      SET @Inventory = LookUp("EDAP_ItemStore_RealTimeInventory","INVENTORY","ITEM_CODE",@ItemCode,"STORE_KEY", @ETPreferredStore)
+      SET @WasPrice = LookUp("LTSMasterLookupNB", "EDLP", "ItemCode", @ItemCode)
+      SET @NewPrice = LookUp("EDAP_ItemStore_RealTimeInventory","Price","ITEM_CODE",@ItemCode,"STORE_KEY",@ETPreferredStore)
+      SET @ItemSubcategory = Lookup("EDAP_Item","SUBCATEGORY", "Item_Code", @ItemCode)
+      IF @j == 1 THEN
+        SET @namesRows = LOOKUPROWS("Varietal_FriendlyNames", "Varietal", @ItemSubcategory)
+        IF RowCount(@namesRows) > 0 THEN
+          SET @CasualVarietalName = Lookup("Varietal_FriendlyNames","CasualName", "Varietal", @ItemSubcategory)
+          SET @CasualSingularName = Lookup("Varietal_FriendlyNames","CasualSingular", "Varietal", @ItemSubcategory)
+          SET @SubjectVarietalName = trim(@CasualVarietalName)
+          SET @SubjectSingularName = trim(@CasualSingularName)
+        ELSE  
+          SET @SubjectVarietalName = trim(@ItemSubcategory)
+          SET @SubjectSingularName = trim(@ItemSubcategory)
+        ENDIF
+      ENDIF
+      IF @Inventory >= 6 AND NOT EMPTY(@WasPrice) AND @WasPrice > @NewPrice THEN
+        IF EMPTY(@ItemString) THEN
+          SET @ItemString = @ItemCode
+        ELSE
+          SET @ItemString = CONCAT(@ItemString, "|", @ItemCode)
+        ENDIF
+        SET @VarietalCount = ADD(@VarietalCount, 1)
+      ELSE
+      ENDIF
+    NEXT @j
+  ENDIF
+ENDIF
+
+/* Filling with second preference in other Dept */
+SET @xtraVarietalCount = 0
+SET @ComboCount = ADD(@ItemCount,@VarietalCount)
+IF @ComboCount < 7 THEN
+  SET @xtraNeedToFill = SUBTRACT(7,@ComboCount)
+  IF @SubCatPrefCategory != "Wine" THEN
+    SET @xtraVarietalRows = LookupOrderedRows("LTSMasterLookupNB",@xtraNeedToFill,"Discount Desc","Varietal",@WineSubCatPref,"StoreKey",@ETPreferredStore)
+  ELSE
+    SET @xtraVarietalRows = LookupOrderedRows("LTSMasterLookupNB",@xtraNeedToFill,"Discount Desc","Varietal",@SpiritsSubCatPref,"StoreKey",@ETPreferredStore)
+  ENDIF
+  SET @xtraVarietalrowCount = ROWCOUNT(@xtraVarietalRows)
+  IF @xtraVarietalRowCount > 0 THEN
+    FOR @x = 1 TO @xtraVarietalRowCount DO
+      SET @row = Row(@xtraVarietalRows,@x)
+      SET @ItemCode = Field(@row,"ItemCode")
+      SET @Inventory = LookUp("EDAP_ItemStore_RealTimeInventory","INVENTORY","ITEM_CODE",@ItemCode,"STORE_KEY", @ETPreferredStore)
+      SET @WasPrice = LookUp("LTSMasterLookupNB", "EDLP", "ItemCode", @ItemCode)
+      SET @NewPrice = LookUp("EDAP_ItemStore_RealTimeInventory","Price","ITEM_CODE",@ItemCode,"STORE_KEY",@ETPreferredStore)
+      SET @ItemSubcategory = Lookup("EDAP_Item","SUBCATEGORY", "Item_Code", @ItemCode)
+      IF @x == 1 THEN
+        SET @xtnamesRows = LOOKUPROWS("Varietal_FriendlyNames", "Varietal", @ItemSubcategory)
+        IF RowCount(@xtnamesRows) > 0 THEN
+          set @namerow = Row(@xtnamesRows,@x)
+          SET @XtraVarietalName = Lookup("Varietal_FriendlyNames","CasualName", "Varietal", @ItemSubcategory)
+          SET @XtraSingularName = Lookup("Varietal_FriendlyNames","CasualSingular", "Varietal", @ItemSubcategory)
+          SET @xtraSubjectVarietalName = trim(@XtraVarietalName)
+          SET @xtraSubjectSingularName = trim(@XtraSingularName)
+          SET @SLFlag = "SL Variables Set Friendly"
+        ELSE  
+          SET @xtraSubjectVarietalName = trim(@ItemSubcategory)
+          SET @xtraSubjectSingularName = trim(@ItemSubcategory)
+          SET @SLFlag = "SL Variables Set Not Friendly"
+        ENDIF
+      ENDIF
+      IF @Inventory >= 6 AND NOT EMPTY(@WasPrice) AND @WasPrice > @NewPrice THEN
+        IF EMPTY(@ItemString) THEN
+          SET @ItemString = @ItemCode
+        ELSE
+          SET @ItemString = CONCAT(@ItemString, "|", @ItemCode)
+        ENDIF
+        SET @xtraVarietalCount = ADD(@xtraVarietalCount, 1)
+      ELSE
+      ENDIF
+    NEXT @x
+  ENDIF
+ENDIF
+
+SET @FinalRows = BuildRowSetFromString(@ItemString, "|")
+SET @FinalCount = RowCount(@FinalRows)
+
+
+IF @FinalCount < 1 /*OR (@ItemCount == 0 AND @VarietalCount < 2)*/ THEN
+  /* Non Personalized Stuff Here */
+  SET @heroimage = @NonPersonalizedHero
+  set @link = "https://totalwine.onelink.me/uqDX/7ec3a179?%%=v(@web_tracking)=%%&af_ad=%%=v(@campaign)=%%"
+  set @Heroalt = "Shop all Limited-time specials!"
+  set @EmailVersion = "nonpersonalized"
+ ]%%
+ <table cellpadding="0" cellspacing="0" border="0" width="600" style="width:100%;">
+  <tr>
+    <td>  
+      <a href="%%=redirectto(@link)=%%" border="0"><img src="%%=v(@heroimage)=%%" bgcolor="#b8b9be" height="auto" width="600" style="height:auto;width:100%;display: block;padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; background-color:#b8b9be; text-align:center; font-size:35px; line-height:40px; color:#383838;" title="%%=v(@Heroalt)=%%" alt="%%=v(@Heroalt)=%%" border="0"></a></td>
+  </tr>
+</table>
+
+  %%[
+ELSE
+  /* Personalized Stuff Here */
+  SET @heroimage = @PersonalizedHero
+  set @link = "https://totalwine.onelink.me/uqDX/7ec3a179?%%=v(@web_tracking)=%%&af_ad=%%=v(@campaign)=%%"
+  set @Heroalt = "Shop all Limited-time specials!"
+  ]%%
+   <table cellpadding="0" cellspacing="0" border="0" width="600" style="width:100%;">
+  <tr>
+    <td style="padding-bottom:20px;">  
+      <a href="%%=redirectto(@link)=%%" border="0"><img src="%%=v(@heroimage)=%%" bgcolor="#b8b9be" height="auto" width="600" style="height:auto;width:100%;display: block;padding-top: 0px; padding-right: 0px; padding-bottom: 0px; padding-left: 0px; background-color:#b8b9be; text-align:center; font-size:35px; line-height:40px; color:#383838;" title="%%=v(@Heroalt)=%%" alt="%%=v(@Heroalt)=%%" border="0"></a></td>
+  </tr>
+</table>
+
+  %%[
+  /* Build Item List for blocking duplicates */
+  var @Item1, @Item2, @Item3, @Item4, @Item5, @Item6, @Item7
+  For @k = 1 TO @FinalCount DO
+    set @row = Row(@FinalRows,@k)
+    set @ITEM_CD = Field(@row,1)
+    IF @k == 1 THEN
+      SET @Item1 = @ITEM_CD
+    ELSEIF @k == 2 THEN
+      SET @Item2 = @ITEM_CD
+    ELSEIF @k == 3 THEN
+      SET @Item3 = @ITEM_CD
+    ELSEIF @k == 4 THEN
+      SET @Item4 = @ITEM_CD
+    ELSEIF @k == 5 THEN
+      SET @Item5 = @ITEM_CD
+    ELSEIF @k == 6 THEN
+      SET @Item6 = @ITEM_CD
+    ELSEIF @k == 7 THEN
+      SET @Item7 = @ITEM_CD
+    ENDIF 
+  NEXT @k
+  /* End Item List */
+  
+  
+  FOR @c = 1 TO @FinalCount DO
+  
+    /* Checking for duplicate Items and setting a skip variable */
+    IF @c == 1 THEN
+    SET @skip = 0
+    ELSEIF @c == 2 THEN
+    IF @Item2 != @Item1 THEN
+    SET @skip = 0
+    ELSE 
+    SET @skip = 1
+    ENDIF
+    ELSEIF @c == 3 THEN
+    IF @Item3 != @Item1 AND @Item3 != @Item2 THEN
+    SET @skip = 0
+    ELSE
+    SET @skip = 1
+    ENDIF
+    ELSEIF @c == 4 THEN  
+    IF @Item4 != @Item1 AND @Item4 != @Item2 AND @Item4 != @Item3 THEN
+    SET @skip = 0
+    ELSE
+    SET @skip = 1
+    ENDIF
+    ELSEIF @c == 5 THEN 
+    IF @Item5 != @Item1 AND @Item5 != @Item2 AND @Item5 != @Item3 AND @Item5 != @Item4 THEN
+    SET @skip = 0
+    ELSE
+    SET @skip = 1
+    ENDIF
+    ELSEIF @c == 6 THEN 
+    IF @Item6 != @Item1 AND @Item6 != @Item2 AND @Item6 != @Item3 AND @Item6 != @Item4 AND @Item6 != @Item5 THEN
+    SET @skip = 0
+    ELSE
+    SET @skip = 1
+    ENDIF
+    ELSEIF @c == 7 THEN
+    IF @Item7 != @Item1 AND @Item7 != @Item2 AND @Item7 != @Item3 AND @Item7 != @Item4 AND @Item7 != @Item5 AND @Item7 != @Item6 THEN
+    SET @skip = 0 ELSE
+    SET @skip = 1
+    ENDIF ELSE
+    SET @skip = 1
+    ENDIF
+  
+    SET @ActiveRow = ROW(@FinalRows, @c)
+    SET @ItemCode = FIELD(@ActiveRow, 1)
+    
+      IF @skip == 1 THEN
+        /* Don't show HTML */
+      ELSE
+      ]%%                      
+      %%=ContentBlockbyID("668319")=%%
+      <!--<p style="font-family:Noto Sans Mono, Arial, sans-serif;font-size:13px;color:darkred;padding:0;margin:5px;">ItemCategory: %%=v(@ItemCategory)=%%</p>
+      <p style="font-family:Noto Sans Mono, Arial, sans-serif;font-size:13px;color:darkred;padding:0;margin:5px;">ItemSubCategory: %%=v(@ItemSubcategory)=%%</p>-->
+      %%[
+      ENDIF
+  NEXT @c 
+ENDIF
+]%%
+<!--<p style="font-family:Noto Sans Mono, Arial, sans-serif;font-size:13px;color:darkblue;padding:0;margin:20px 5px 5px;">Varietal Singular: %%=v(@SubjectSingularName)=%%</p>
+<p style="font-family:Noto Sans Mono, Arial, sans-serif;font-size:13px;color:darkblue;padding:0;margin:5px;">Varietal Plural: %%=v(@SubjectVarietalName)=%%</p>
+<p style="font-family:Noto Sans Mono, Arial, sans-serif;font-size:13px;color:darkblue;padding:0;margin:5px;">Extra Varietal Singular: %%=v(@xtraSubjectSingularName)=%%</p>
+<p style="font-family:Noto Sans Mono, Arial, sans-serif;font-size:13px;color:darkblue;padding:0;margin:5px;">Extra Varietal Plural: %%=v(@xtraSubjectVarietalName)=%%</p>
+                  
+<p style="font-family:Noto Sans Mono, Arial, sans-serif;font-size:13px;color:darkgreen;padding:0;margin:20px 5px 5px;">Item Count: %%=v(@ItemCount)=%%</p>
+<p style="font-family:Noto Sans Mono, Arial, sans-serif;font-size:13px;color:darkgreen;padding:0;margin:5px;">Varietal Count: %%=v(@VarietalCount)=%%</p>
+<p style="font-family:Noto Sans Mono, Arial, sans-serif;font-size:13px;color:darkgreen;padding:0;margin:5px;">Xtra Varietal Count: %%=v(@XtraVarietalCount)=%%</p>-->
+%%[
+
+/* Set Subjectlines */
+IF @ItemCount != 0 THEN
+  IF @VarietalCount != 0 OR @xtraVarietalCount != 0 THEN 
+    SET @sl = CONCAT('Just for You: ', @SubjectItemName,' and More on Sale!')
+    SET @EmailVersion = "ItemMatch and VarietalMatch"
+  ELSE
+    SET @sl = CONCAT('Just for You: ', @SubjectItemName,' on Sale!')
+    SET @EmailVersion = "ItemMatch"
+  ENDIF
+
+ELSEIF @VarietalCount != 0 OR @xtraVarietalCount != 0 THEN /*Some varietal match exists*/
+  SET @EmailVersion = "VarietalMatch"
+  SET @SLTagOn = ' - Limitations Apply, See Details Inside'
+  IF @VarietalCount != 0 THEN /*First Varietal Exists*/
+    IF @VarietalCount == 1 THEN /*First Varietal is Singular*/
+      IF @XtraVarietalCount == 1 THEN /*both varietals are singular*/
+        SET @sl = CONCAT('Just for You: ', ProperCase(@SubjectSingularName), ' and ', ProperCase(@xtraSubjectSingularName), ' on Sale!')
+        SET @SLCODE = "Primary Singular, Secondary Singular"
+      ELSEIF @XtraVarietalCount != 0 THEN /*First Varietal is Singular, second is multiple*/
+        SET @sl = CONCAT('Just for You: ', ProperCase(@SubjectSingularName), ' and ', ProperCase(@xtraSubjectVarietalName), ' on Sale!')
+        SET @SLCODE = "Primary Singular, Secondary Multiple"
+      ELSE /*First Varietal is singular, second doesn't exist*/
+        SET @sl = CONCAT('Just for You: ', ProperCase(@SubjectSingularName),' on Sale!')
+        SET @SLCODE = "Primary Singular"
+      ENDIF
+    ELSE /*First Varietal is multiple */
+      
+      IF @XtraVarietalCount == 1 THEN /*first varietal is multiple, second is singular*/
+        SET @sl = CONCAT('Just for You: ', ProperCase(@SubjectVarietalName), ' and ', ProperCase(@xtraSubjectSingularName), ' on Sale!')
+        SET @SLCODE = "Primary Multiple, Secondary Singular"
+      ELSEIF @XtraVarietalCount != 0 THEN /*both are multiple */
+        SET @sl = CONCAT('Just for You: ', ProperCase(@SubjectVarietalName),' and ', ProperCase(@xtraSubjectVarietalName), ' on Sale!')
+        SET @SLCODE = "Primary and Secondary Multiple"
+      ELSE /*First Varietal is multiple, second doesn't exist*/
+        SET @sl = CONCAT('Just for You: ', ProperCase(@SubjectVarietalName),' on Sale!')
+        SET @SLCODE = "Primary Multiple"
+      ENDIF
+
+    ENDIF
+  ELSE /*First Varietal Doesn't Exist */
+    IF @XtraVarietalCount == 1 THEN /*second Varietal is singular */
+      SET @sl = CONCAT('Just for You: ', ProperCase(@xtraSubjectSingularName),' on Sale!')
+      SET @SLTagOn = ' - Limitations Apply, See Details Inside'
+      SET @SLCODE = "Secondary Singular"
+    ELSE /*second varietal is multiple */
+      SET @sl = CONCAT('Just for You: ', ProperCase(@xtraSubjectVarietalName),' on Sale!')
+      SET @SLTagOn = ' - Limitations Apply, See Details Inside'
+      SET @SLCODE = "Secondary Multiple"
+    ENDIF  
+  ENDIF
+
+ELSE
+  SET @sl = "Save on Limited-Time Specials!"
+  set @EmailVersion = "nonpersonalized"
+  VAR @SLTagOn
+ENDIF
+
+SET @SubjectLine = CONCAT(@sl, @SLTagOn)
+SET @LTATXSubjectLine = CONCAT(@sl, ' PLUS Deals Inside', @SLTagOn)
+SET @LTASubjectLine = CONCAT(@sl, ' PLUS Deals Inside', @SLTagOn)
+
+]%%
+<!--<p style="font-family:Noto Sans Mono, Arial, sans-serif;font-size:13px;color:mediumpurple;padding:0;margin:20px 5px 5px;">SLCODE: %%=v(@SLCODE)=%%</p>
+<p style="font-family:Noto Sans Mono, Arial, sans-serif;font-size:13px;color:mediumpurple;padding:0;margin:20px 5px 5px;">%%=v(@SLFlag)=%%</p>
+<p style="font-family:Noto Sans Mono, Arial, sans-serif;font-size:13px;color:darkblue;padding:0;margin:5px;">SLTagOn: %%=v(@SLTagOn)=%%</p>
+<p style="font-family:Noto Sans Mono, Arial, sans-serif;font-size:13px;color:darkblue;padding:0;margin:5px;">SubjectLine: %%=v(@Subjectline)=%%</p>-->
+
+%%[
+IF @FinalCount < 1 /*OR (@ItemCount == 0 AND @VarietalCount < 2)*/ THEN
+/*Nothing*/
+ELSE
+  /* Begin LTS Button */ /*</div>*/]%%
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="width:100%; height:auto">
+    <tr>
+      <td align="center" style="padding:40px 0 40px 0">
+        <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td align="center" class="fallback-body" style="padding:13px 25px;-webkit-border-radius: 3px;border-radius:3px;" bgcolor="#007F73"><a class="fallback-body" href="%%=redirectto(@link)=%%" target="_blank" style="font-size: 18px; font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif; text-decoration: none; color: #ffffff; border: 0px solid #007F73; display: inline-block;font-weight:500;">Shop All Limited-Time Specials</a></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>   
+                      
+%%[               
+SET @current_date = Now()
+SET @finaldate = formatdate(DATEADD(@current_date, '-2', 'D' ), "mm/dd/yyyy")
+SET @StoreName = Lookup("store", "store_name", "store_key", @ETPreferredStore) 
+]%%
+<table cellpadding="0" cellspacing="0" border="0" width="600" style="width:100%;">
+  <tr>
+    <td style="font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif; padding: 30px 20px 0;font-size:13px; font-weight: 400; line-height:auto; color:#000000;text-align:left; "> *Prices advertised are correct at date of email send on %%=v(@finaldate)=%% and <strong>valid in %%=v(@StoreName)=%% only</strong>. Product prices are limited time and subject to change. Displayed products and prices may not be available in all stores and are subject to availability. </td>
+  </tr>
+</table> 
+                      
+                      
+%%[ENDIF]%%   
+
+%%[/* Send LOG with version reporting */
+INSERTDE(@sendlogDE, "subscriberKey", @subscriberkey, "EmailAddress", @SubscriberEmail, "PriceZone", @ETPriceZone, "PreferredStore", @ETPreferredStore, "LoyaltyNumber", @loyaltyNum, "EmailVersion", @EmailVersion)
+]%%
+                  
+<!-- LTA FAUXPON -->
+%%=ContentBlockbyID("668314")=%%
+<!-- LTA FAUXPON -->   
+
+

@@ -1,0 +1,571 @@
+<!-- Whitelisting IPs -->
+<script runat="server">
+  Platform.Load("Core", "1");
+
+var allowedIPs = [
+  "198.167.189.56",
+  "198.167.189.57",
+  "72.66.119.38",
+  "72.66.119.39",
+  "208.185.39.242",
+  "208.185.39.243",
+  "40.117.40.254"
+];
+
+try {
+  var validIp = false;
+  for (var i = 0; i < allowedIPs.length; i++) {
+    if (allowedIPs[i] == Platform.Request.ClientIP) {
+      validIp = true;
+    }
+  }
+
+  if (validIp === false) {
+    // Request originates from wrong IP
+    throw new Error("Non-whitelisted IP");
+  } else {
+</script>
+%%[set @showpage = TRUE]%%
+<script runat="server">
+  }
+} catch (e) {
+  // You could also redirect to an error page here.
+  // This catch-block catches any error within the try-block, so not only wrong IP addresses
+  Write(Stringify(e));
+}
+</script>
+%%[
+IF @showpage THEN
+]%%
+<<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Email Status Page</title>
+<meta name="description" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital@0;1&display=swap" rel="stylesheet">
+<style type="text/css">
+  * {
+  box-sizing: border-box;
+  font-family: 'Source Sans 3', Arial, sans-serif;
+  }
+  .header {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    background-color: #067f77;
+    height: 65px;
+  }
+
+  .header img {
+    width: 80px;
+    height: auto;
+    align-self: center;
+    padding: 0px 15px 0px 15px;
+  }
+  .page-title {
+    color: #ffffff;
+    font-size: 18px;
+    align-self: center;
+    font-weight: 400;
+    font-family: 'Source Sans 3', 'Helvetica', sans-serif;
+    border-left: 2px solid #ffffff;
+    padding-left: 25px;
+    padding-right: 35px;
+  }
+  .main-container {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    padding: 0 20px 0 20px;
+  }
+  .form-container {
+    flex: 100%;
+    padding: 20px;
+    background-color: #ffffff;
+    align-items: center;
+    min-height: 80%;
+  }
+  .Section1 {
+    text-align: center;
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    padding-top: 20px;
+  }
+
+  .section1-form {
+    text-align: center;
+    width: 70%;
+    padding: 40px;
+    border: 1px solid #000000;
+    border-radius: 5px;
+    background-color: #eeeeee;
+  }
+
+  .MainOutput {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    width: 100%;
+    align-content: center;
+    justify-content: center;
+  }
+
+  .rowOutput {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px 10px 20px;
+    background-color: #ffffff;
+    border: 1px solid #eeeeee;
+    width: 100%;
+  }
+
+  .sectionTitle {
+    text-decoration: underline;
+  }
+
+  .label {
+    text-align: left;
+    font-size: 12px !important;
+    font-weight: 600px;
+  }
+
+  .OutputVariable {
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .section2 {
+    align-self: center;
+    margin-top: 20px;
+    text-align: left;
+    width: 70%;
+    padding: 40px;
+    border: 1px solid #000000;
+    border-radius: 5px;
+    background-color: #eeeeee;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  input,
+  textarea,
+  select {
+    flex: 0 0 auto;
+  }
+
+  .form button {
+    margin-top: 30px;
+  }
+
+  .form label {
+    padding-left: 10px;
+    font-size: 14px;
+  }
+
+  button[type='submit'] {
+    padding: 3px 10px;
+    border: 2px solid #ffffff;
+  }
+
+  .table-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  .form {
+    list-style-type: none;
+    padding: 20px 0px 30px 0px;
+    margin: 0;
+  }
+
+  .form li {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    line-height: 22px;
+    padding-top: 5px;
+  }
+
+  .form p {
+    font-size: 14px;
+  }
+
+  .MainOutput {
+    text-align: center;
+  }
+  .button {
+    color: #000000;
+    padding: 8px 15px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 12px;
+    cursor: pointer;
+    align-self: center;
+  }
+  #content {
+    height: 200px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #000000;
+  }
+  .table-wrapper {
+    overflow-y: scroll;
+    flex-grow: 1;
+    background-color: #ffffff;
+  }
+.table-wrapper th {
+    position: sticky;
+    top: 0;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  th {
+    background: cadetBlue;
+  }
+  td,
+  th {
+    text-align: left;
+    padding: 4px 0px 5px 5px;
+  }
+  tr:nth-child(even) {
+    background-color: #dddddd;
+  }
+  td:nth-last-child() {
+    border-bottom: 0px !important;
+  }
+
+  .SentEmailNames {
+    font-size: 13px;
+  }
+
+  .holdoutMessage {
+    width: 100%;
+    height: auto;
+    padding: 20px 10px 20px 10px;
+    background-color: #f9d67d;
+    align-self: center;
+    align-content: center;
+    text-align: center;
+    margin-bottom: 25px;
+  }
+
+.holdoutMessage-Headline {
+  font-weight: 400;
+  font-size: 14px;
+  margin-bottom: 0;
+}
+
+.holdoutMessage-Subline {
+  margin-top: 5px;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.holdoutContactButton {
+  padding: 10px 18px;
+  margin: 10px 0 10px 0;
+  cursor: pointer;
+}
+
+.holdoutActionMessage {
+  padding: 10px;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.holdoutInternalMessage {
+  font-size: 13px;
+  font-weight: 400;
+}
+</style>
+</head>
+<body>
+
+%%[
+set @status = REQUESTPARAMETER('process')
+set @today = Now()
+set @end_date = DateAdd(@today, '180', 'D')
+set @de = 'v4_Non Openers Query'
+set @de2 = 'non_openers_exclusions'
+
+
+
+if @status == 'lookup' then
+  /* - - - - - -  Just retrieving subscriber info - - - - - -  */
+  set @email = TRIM(REQUESTPARAMETER('email'))
+
+  set @rr = CreateObject('RetrieveRequest')
+  SetObjectProperty(@rr,'ObjectType','Subscriber')
+  AddObjectArrayItem(@rr,'Properties','ID')
+  AddObjectArrayItem(@rr,'Properties','EmailAddress')
+  AddObjectArrayItem(@rr,'Properties','SubscriberKey')
+  AddObjectArrayItem(@rr,'Properties','Status')
+
+  set @sfp = CreateObject('SimpleFilterPart')
+  SetObjectProperty(@sfp, 'Property', 'EmailAddress')
+  SetObjectProperty(@sfp,'SimpleOperator','equals')
+  AddObjectArrayItem(@sfp,'Value',@email)
+  SetObjectProperty(@rr,'Filter',@sfp)
+
+  set @subscriber = InvokeRetrieve(@rr,@rrStatus)
+  set @subCount = RowCount(@subscriber)
+  if @subCount > 0 then
+    set @existsindb = 'Yes'
+    if @subCount > 1 then
+      set @error = 'There is more than one subscriber with this email'
+    else
+      set @subkey = FIELD(ROW(@subscriber,1), 'SubscriberKey')
+      set @sub_status = FIELD(ROW(@subscriber,1), 'Status')
+      if @sub_status != 'Unsubscribed' then
+        set @subscribed = 'Subscribed'
+      else
+        set @subscribed = @sub_status
+      endif
+      SET @attributes = FIELD(ROW(@subscriber,1),'Attributes')
+      for @i = RowCount(@attributes) downto 1 do
+        set @att = Row(@attributes, @i)
+        set @att_name = Field(@att,'Name')
+        set @att_val = Field(@att,'Value')
+        if @att_name == 'Offers' then
+          set @offers = @att_val
+        elseif @att_name == 'Events' then
+          set @news = @att_val
+        elseif @att_name == 'Loyalty ID' then
+          if IsNull(@att_val) or @att_val == '' then
+            set @isloyalty = 'No'
+          else
+            set @isloyalty = 'Yes'
+            set @LoyaltyNum = @att_val
+          endif
+        elseif @att_name == 'PreferredStore' then
+          set @PreferredStore = @att_val /*was 28 and 29 */
+        endif
+      next @i
+    endif
+
+    if @offers == 'Y' and @news == 'Y' then
+      set @offers_news = 'Offers and Events'
+    elseif @news == 'Y' then
+      set @offers_news = 'Events Only'
+    elseif @offers == 'Y' then
+      set @offers_news = 'Offers Only'
+    else
+      set @offers_news = 'No Offers - No Events'
+    endif
+
+    set @rows = LookupRows(@de,'EmailAddress', @email)
+    set @rowCount = rowCount(@rows)
+    if @rowCount > 0 then
+      set @recent_open = 'Yes'
+    else
+      set @recent_open = 'No'
+    endif
+
+  else
+    set @existsindb = 'No'
+  endif
+
+
+
+elseif @status == 'removesupp' then
+  /* - - - - - -  Removing Non-Opener Suppression - - - - - -  */
+  set @email = REQUESTPARAMETER('email')
+  DeleteData(@de,'EmailAddress',@email)
+  InsertDE(@de2, 'EmailAddress', @email, 'start', @today, 'end', @end_date, 'subscriberKey', @subKey)
+  set @remove_supp_output = concat(@email, ' has been removed from ', @de, '. start date: ', @today, ' end_date: ', @end_date)  
+
+
+
+
+elseif @status == 'resub' then
+  /* - - - - - -  Resubscribing, removing non-opener, and resetting preferences - - - - - -  */
+  set @email = REQUESTPARAMETER('email')
+  set @subkey = REQUESTPARAMETER('subkey')
+  /* ------------ remove suppression ------------ */
+  DeleteData(@de,'EmailAddress',@email)
+  InsertDE(@de2, 'EmailAddress', @email, 'start', @today, 'end', @end_date, 'subscriberKey', @subKey)
+  /* ------------ update subscriber status to active ------------ */
+  /* ------------ create subscriber object ------------ */
+  set @sub = CreateObject('Subscriber')
+  SetObjectProperty(@sub,'SubscriberKey',@subkey)
+  SetObjectProperty(@sub,'Status','Active')
+  /* ------------update offers to y ------------ 
+  set @attr_o = CreateObject("Attribute")
+  SetObjectProperty(@attr_o, "Name", "Offers")
+  SetObjectProperty(@attr_o, "Value", "Y")
+  AddObjectArrayItem(@sub, "Attributes", @attr_o)
+  /* ------------update events to y ------------ 
+  set @attr_e = CreateObject("Attribute")
+  SetObjectProperty(@attr_e, "Name", "Events")
+  SetObjectProperty(@attr_e, "Value", "Y")
+  AddObjectArrayItem(@sub, "Attributes", @attr_e)
+  /* ------------update sub status ------------ */
+  set @statusCode = InvokeUpdate(@sub, @statusMsg, @errorCode)
+  if @errorCode != 0 then
+    set @errorStatus = 'yes'
+  else
+    set @resub_output = 'Email address reset'
+  endif
+  /* ------------handle error ------------ */
+  if @errorStatus == 'yes' then
+    set @error = 'Sorry an error has occurred. Please try again later.'
+  endif
+
+
+
+
+endif
+]%%
+
+
+<div class="header">
+  <img src="https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/bfe4f94b-e2dd-4b01-8597-d9fdcc22151f.png" alt="" style="height:45px; width:auto; ">
+  <p class="page-title">Email Status Page</p>
+</div>
+
+%%[ 
+SET @loyaltyTier = Lookup("Loyalty_import_v2","Loyalty_Tier","Email",@Emailsubscriber)
+SET @storeName = Lookup("store","store_name","store_key", @preferredstore)
+]%%
+<div class="main-container">
+  <div class="content">
+  </div>
+  <div id="formcontent" class="form-container">
+    <div class="Section1">
+      <form class="section1-form" method="post" action="%%=CloudPagesURL(2641)=%%">
+        <input type="hidden" name="process" id="process" value="lookup">
+        <label for="email" class="red">Enter email address here: </label>
+        <input name="email" type="text" maxlength="255"><br><br>
+        <label style="display:none !important;" for="loyaltyID" class="red">OR Enter loyalty ID: </label>
+        <input style="display:none !important;" name="loyaltyID" type="text" maxlength="255">
+        <input type="submit" class="button" value="Submit">
+      </form>
+    </div>
+    <div class="section2">
+      <div class="sectionTitle">
+        <span class="red">Section 2 &ndash; This section will tell you the status of the email address entered above</span>
+      </div>
+      <br><br>
+      <div class="MainOutput">
+        <span style="display:none;">%%=v(@error)=%%</span>
+        <div class="rowOutput">
+          <div class="label">Email</div>
+          <div class="OutputVariable">%%=v(@Emailsubscriber)=%%</div>
+        </div>
+        <div class="rowOutput">
+          <div class="label">Loyalty Number</div>
+          <div class="OutputVariable">%%=v(@LoyaltyNum)=%%</div>
+        </div>
+        <div class="rowOutput">
+          <div class="label">Loyalty Tier</div>
+          <div class="OutputVariable"> %%=v(@loyaltyTier)=%%</div>
+        </div>
+        <div class="rowOutput">
+          <div class="label">Preferred Store</div>
+          <div class="OutputVariable">%%=v(@preferredstore)=%%</div>
+        </div>
+        <div class="rowOutput">
+          <div class="label">Store Name</div>
+          <div class="OutputVariable">%%=v(@storeName)=%%</div>
+        </div>
+        <div class="divider">
+          &nbsp;<br>
+        </div>
+        <div class="rowOutput">
+          <div class="label">1. Does this email exist in our database?</div>
+          <div class="OutputVariable">%%=v(@existsindb)=%%</div>
+        </div>
+        <div class="rowOutput">
+          <div class="label">2. Is this email address part of the loyalty program?</div>
+          <div class="OutputVariable">%%=v(@isloyalty)=%%</div>
+        </div>
+        <div class="rowOutput">
+          <div class="label">3. What is the subscription status?</div>
+          <div class="OutputVariable">%%=v(@subscribed)=%%</div>
+        </div>
+        <div class="rowOutput">
+          <div class="label">4. What type of emails will this address receive?</div>
+          <div class="OutputVariable">%%=v(@offers_news)=%%</div>
+        </div>
+        <div class="rowOutput">
+          <div class="label">5. Is this email address Active or has it been marked Bounced or Held?</div>
+          <div class="OutputVariable">%%=v(@sub_status)=%%</div>
+        </div>
+        <div class="rowOutput">
+          <div class="label">6. Has this email address been suppressed for not opening our email?</div>
+          <div class="OutputVariable">%%=v(@recent_open)=%%</div>
+        </div>
+      </div>
+      <div class="table-container">
+        <div id="content">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Sent Date</th>
+                  <th>Email Name</th>
+                </tr>
+              </thead>
+              %%[ Set @emailSends = LookupOrderedRows("_Sent",0,"EventDate desc","SubscriberKey", @subkey) ]%%
+              %%[ SET @emailsSentCount = ROWCOUNT(@emailSends)
+              for @instance = 1 to @emailsSentCount do
+              SET @row = Row(@emailSends,@instance)
+              SET @job = Field(@row,"JobID")
+              SET @event = Field(@row,"EventDate")
+              SET @emailName = Lookup("_job","EmailName","JOBID",@job)
+              ]%%
+              <tr>
+                <td>%%=v(@event)=%%</td>
+                <td>%%=v(@emailName)=%%</td>
+              </tr>
+              %%[next @instance ]%%
+            </table>
+          </div>
+        </div>
+      </div>
+      <br><br>
+      <div class="sectionTitle">
+        <span class="red">Section 3 &ndash; Actions</span>
+      </div>
+      <p>
+        <strong>Remove this customer from the 180 day suppression list.</strong>
+      </p>
+      <form method="post" action="%%=CloudPagesURL(2641)=%%">
+        <input type="hidden" name="process" id="process" value="removesupp">
+        <input type="hidden" name="email" id="email" value="%%=v(@email)=%%">
+        <input type="submit" class="Button" value="Remove Suppression">
+      </form><br>
+      <span class="red">%%=v(@remove_supp_output)=%%</span>
+      <p></p>
+      <p>
+        <strong>Reset all possible settings so this customer receives email.</strong>
+      </p>
+      <form method="post" action="%%=CloudPagesURL(2641)=%%">
+        <input type="hidden" name="process" id="process" value="resub">
+        <input type="hidden" name="email" id="email" value="%%=v(@email)=%%">
+        <input type="hidden" name="subkey" id="subkey" value="%%=v(@subkey)=%%">
+        <input type="submit" class="Button" value="Reset Email Address">
+      </form><br>
+      <span class="red">%%=v(@resub_output)=%%</span>
+    </div>
+  </div>
+</div>
+
+%%[
+ELSE /*showpage false */
+]%%
+<p>
+  Please access this page from a secure location
+</p>
+</body>
+</html>
+%%[
+ENDIF
+]%%

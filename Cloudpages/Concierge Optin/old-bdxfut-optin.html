@@ -1,0 +1,216 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"><html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Sign Up for Bordeaux Futures Email Notifications</title>
+    <style type="text/css">
+	.shipstate { display: none; }
+	</style>
+</head>
+<body>
+<script type="text/javascript" src="http://image.email-totalwine.com/lib/fecc157071620079/m/3/jquery-1.6.1.min.js">
+				</script>
+				<script language='javascript'>
+				function validateProfile() {
+					var strErrorMessage = '';
+					var objForm = document.frmProfile;
+					if (!IsValidEmail(objForm.EmailAddress.value)) {
+						strErrorMessage += '\u2022 Please enter a valid email address to receive our latest in-store promotions, featured products, and special event information.\n'
+					}
+					if (objForm.PreferredStore.selectedIndex == 0) {
+						strErrorMessage += '\u2022 Please select your preferred store.\n'
+					}
+					if ((objForm.PreferredStore.options[objForm.PreferredStore.selectedIndex].value == "9999") && objForm.PreferredState.value.length == 0) {
+						strErrorMessage += '\u2022 Please select your shipping state.\n';
+					}
+					if (strErrorMessage != '') {
+						alert(strErrorMessage);
+						return false;
+					} else {
+						return true;
+					}
+				}
+				function IsValidEmail(strEmail) {
+					
+					var emailReg = "^[A-Za-z0-9-._]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,4}$";
+					var regex = new RegExp(emailReg);
+					return regex.test(strEmail);
+				}
+				$(document).ready(function() { 
+					$("#PreferredStore").click( function() {
+						var value = $(this).val();
+						if(value == "9999"){
+							$(".shipstate").show();
+						} else {
+							$(".shipstate").hide();
+						}
+					});
+				});
+				</script>
+                
+<table border="0" cellpadding="0" cellspacing="0" align="center" width="600">
+	<tbody>
+		<tr>
+			<td colspan="5"><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/18/Concierge-2_172BrdxEmail.jpg" alt="" style="display:block" border="0" width="600" height="172"></td>
+		</tr>
+		<tr>
+			<td bgcolor="" width="30"><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/5/spacer.gif" alt="" style="display:block" border="0" width="30" height="30"></td>
+			<td width="20"><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/5/spacer.gif" alt="" style="display:block" border="0" width="20" height="20"></td>
+			<td>
+			<table border="0" cellpadding="0" cellspacing="0" width="500">
+				<tbody>
+					<tr>
+						<td colspan="3"><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/5/spacer.gif" alt="" style="display:block" border="0" width="20" height="20"></td>
+					</tr>
+					<tr>
+						<td colspan="3" align="left"><span style="FONT-FAMILY: Arial, Helvetica, sans-serif; COLOR: #860d0f; FONT-SIZE: 16px"><strong>THANK YOU FOR YOUR INTEREST IN TOTAL WINE & MORE'S BORDEAUX FUTURES</strong></span></td>
+					</tr>
+					<tr>
+						<td colspan="3" align="left">&nbsp;</td>
+					</tr>
+					<tr>
+					  <td colspan="3" align="left"><span style="FONT-FAMILY: Arial, Helvetica, sans-serif; COLOR: #000000; FONT-SIZE: 14px">Once you&rsquo;ve supplied the requested information, our Concierge Sales team will email you up-to-date information on this unique opportunity to reserve and purchase Bordeaux wines at a discount, before they are available in stores. 
+						<p>
+						</p>
+					  <p>
+						 We&rsquo;ll share early reviews and pricing information with you as it becomes available from the chateaux this spring.
+			      </p>
+						</span>
+                        <FORM action="%%=REQUESTPARAMETER('PAGEURL')=%%" method="post" name="frmProfile" onSubmit="return validateProfile();" id="mainform">
+						  <table border="0" cellpadding="10" cellspacing="1">
+						    <tr>
+						      <td valign="top" style="FONT-FAMILY: Arial, Helvetica, sans-serif; COLOR: #000000; FONT-SIZE: 14px"><label for="EmailAddress">Email Address</label>
+					          </td>
+						      <td valign="top"><input id="EmailAddress" maxlength="100" size="45" name="EmailAddress" value="" /></td>
+					        </tr>
+						    <tr>
+						      <td valign="top" style="FONT-FAMILY: Arial, Helvetica, sans-serif; COLOR: #000000; FONT-SIZE: 14px"><label for="PreferredStore3">Preferred Store</label>
+					          </td>
+						      <td valign="top"><SELECT id="PreferredStore" name="PreferredStore">
+						          <option value=""> -- Select -- </option>
+						          <option value="9999"> Shipping</option>
+						          
+						          
+							%%[
+                            IF EMPTY(@storeid) THEN
+								SET @storeid = REQUESTPARAMETER("storeid")
+							ENDIF
+                            
+							SET @rowset = LOOKUPROWS("store","all","true")
+							SET @rowcount = ROWCOUNT(@rowset)
+							FOR @i = 1 TO @rowcount DO
+							SET @row = ROW(@rowset,@i)
+							IF FIELD(@row,'store_key') == @storeid THEN 
+							SET @selected = ' selected'
+							ELSE
+							SET @selected = ''
+							ENDIF
+							]%%
+							
+						          
+						          <option value="%%=FIELD(@row,'store_key')=%%"%%=V(@selected)=%%> %%=FIELD(@row,"store_name")=%%</option>
+						          
+						          %%[
+							NEXT @i
+							]%%
+							
+					            
+						          </SELECT></td>
+					        </tr>
+						    <tr class="shipstate">
+						      <td valign="top" style="FONT-FAMILY: Arial, Helvetica, sans-serif; COLOR: #000000; FONT-SIZE: 14px" ><label for="PreferredState">Ship-To State</label></td>
+						      <td valign="top"><select Name="PreferredState" id="PreferredState">
+						        <option value="" SELECTED> -- Select --</option>
+						        <option value="Alabama"> Alabama</option>
+						        <option value="Alaska"> Alaska</option>
+						        <option value="Arizona"> Arizona</option>
+						        <option value="Arkansas"> Arkansas</option>
+						        <option value="California"> California</option>
+						        <option value="Colorado"> Colorado</option>
+						        <option value="Connecticut"> Connecticut</option>
+						        <option value="Delaware"> Delaware</option>
+						        <option value="Florida"> Florida</option>
+						        <option value="Georgia"> Georgia</option>
+						        <option value="Hawaii"> Hawaii</option>
+						        <option value="Idaho"> Idaho</option>
+						        <option value="Illinois"> Illinois</option>
+						        <option value="Indiana"> Indiana</option>
+						        <option value="Iowa"> Iowa</option>
+						        <option value="Kansas"> Kansas</option>
+						        <option value="Kentucky"> Kentucky</option>
+						        <option value="Louisiana"> Louisiana</option>
+						        <option value="Maine"> Maine</option>
+						        <option value="Maryland"> Maryland</option>
+						        <option value="Massachusetts"> Massachusetts</option>
+						        <option value="Michigan"> Michigan</option>
+						        <option value="Minnesota"> Minnesota</option>
+						        <option value="Mississippi"> Mississippi</option>
+						        <option value="Missouri"> Missouri</option>
+						        <option value="Montana"> Montana</option>
+						        <option value="Nebraska"> Nebraska</option>
+						        <option value="Nevada"> Nevada</option>
+						        <option value="New Hampshire"> New Hampshire</option>
+						        <option value="New Jersey"> New Jersey</option>
+						        <option value="New Mexico"> New Mexico</option>
+						        <option value="New York"> New York</option>
+						        <option value="North Carolina"> North Carolina</option>
+						        <option value="North Dakota"> North Dakota</option>
+						        <option value="Ohio"> Ohio</option>
+						        <option value="Oklahoma"> Oklahoma</option>
+						        <option value="Oregon"> Oregon</option>
+						        <option value="Pennsylvania"> Pennsylvania</option>
+						        <option value="Rhode Island"> Rhode Island</option>
+						        <option value="South Carolina"> South Carolina</option>
+						        <option value="South Dakota"> South Dakota</option>
+						        <option value="Tennessee"> Tennessee</option>
+						        <option value="Texas"> Texas</option>
+						        <option value="Utah"> Utah</option>
+						        <option value="Vermont"> Vermont</option>
+						        <option value="Virginia"> Virginia</option>
+						        <option value="Washington"> Washington</option>
+						        <option value="West Virginia"> West Virginia</option>
+						        <option value="Wisconsin"> Wisconsin</option>
+						        <option value="Wyoming"> Wyoming</option>
+						        </select></td>
+					        </tr>
+					      </table>
+						  <table border="0" cellspacing="0" cellpadding="0">
+						    <tr>
+						      <td align="left">&nbsp;<a href="linkHERE">
+                              <INPUT id="__executionContext" type="hidden" name="__executionContext" value="Post" />
+                              <input type="image" value="Submit" class="button" src="http://image.email-totalwine.com/lib/fecc157071620079/m/7/01202014_bordeaux-ex-but.jpg" alt="" style="display:block" border="0" width="103" height="33"></a></td>
+					        </tr>
+					      </table>
+                        </FORM>
+						 </td>
+					</tr>
+					
+					<tr>
+						<td align="left"><br>
+						</td>
+						<td align="left"><br>
+						</td>
+						<td align="left"><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/5/spacer.gif" alt="" style="display:block" border="0" width="20" height="20"></td>
+						<td align="left"></td>
+					</tr>
+					<tr>
+						<td colspan="3" align="left">&nbsp;</td>
+					</tr>
+					<tr>
+						<td colspan="3" align="left"><span style="FONT-FAMILY: Arial, Helvetica, sans-serif; COLOR: #000000; FONT-SIZE: 14px">For more information about Bordeaux Futures visit <a href="http://concierge.totalwine.com" title="www.totalwine.com/concierge" alias="www.totalwine.com/concierge" conversion="false" style="color:#660000; text-decoration: none">www.totalwine.com/concierge</a>.   Contact us by email at <a href="mailto:conciergesales@totalwine.com" style="color:#660000; text-decoration: none">conciergesales@totalwine.com</a> or by phone at <a href="tel:855-841-2752" style="text-decoration: none">(855) 841-2752</a>.</span></td>
+					</tr>
+					<tr>
+						<td colspan="3"><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/5/spacer.gif" alt="" style="display:block" border="0" width="20" height="20"></td>
+					</tr>
+				</tbody>
+			</table>
+			</td>
+			<td width="20"><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/5/spacer.gif" alt="" style="display:block" border="0" width="20" height="20"></td>
+			<td bgcolor="" width="30"><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/5/spacer.gif" alt="" style="display:block" border="0" width="30" height="30"></td>
+		</tr>
+		<tr>
+			<td colspan="5" bgcolor=""><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/5/spacer.gif" alt="" style="display:block" border="0" width="30" height="30"></td>
+		</tr>
+	</tbody>
+</table>
+</body>
+</html>

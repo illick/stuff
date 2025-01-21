@@ -1,0 +1,120 @@
+%%[
+/* Requires @pctdisc and @itemCTA to be set outside this block */
+/* ALSO requires this CSS to be added to mobile styles:
+.itemname {
+  font-size:13px !important;
+}
+.itembutton {
+  font-size:13px !important;
+}
+.typeheader {
+  font-size:13px !important;
+}
+.mpad5 {
+  padding:5px !important;
+}
+.itempad {
+  padding:10px 5px 5px !important;
+}
+*/
+]%%
+<table cellpadding="0" cellspacing="0" border="0" style="background-color:#f7f7f7;">
+  <tr>
+    <td style="padding:10px;">
+      <table cellpadding="0" cellspacing="0" border="0" style="width:100%">
+        <tr>
+          %%[
+                SET @FinalRows = BuildRowSetFromString(@ItemString, "|")
+                SET @FinalCount = RowCount(@FinalRows)
+                ]%%
+
+          %%[
+                FOR @w = 1 TO @FinalCount DO
+                  SET @ActiveRow = ROW(@FinalRows, @w)
+                  SET @ItemCode = FIELD(@ActiveRow, 1)
+
+                  SET @ItemImage = Lookup("HybrisImageURLs_Target","Image_140x196","ItemCode",@ItemCode)
+                  SET @httpsItemImage = Replace(@ItemImage,'http','https')
+                  SET @Itemlink = "https://www.totalwine.com/p/%%=v(@ItemCode)=%%?%%=v(@web_tracking)=%%"
+                  SET @ItemName = Lookup("EDAP_Item","ITEM_NAME","Item_Code",@ItemCode)
+                  SET @ItemName = Propercase(@ItemName)
+                  SET @ItemName = CONCAT(@ItemName, ' ')
+                  SET @ItemName = REPLACE(@ItemName, ' Aop ', ' AOP ')
+                  SET @ItemName = REPLACE(@ItemName, ' Aoc ', ' AOC ')
+                  SET @ItemName = REPLACE(@ItemName, ' Doc ', ' DOC ')
+                  SET @ItemName = REPLACE(@ItemName, ' Docg ', ' DOCG ')
+                  SET @ItemName = REPLACE(@ItemName, ' Do ', ' DO ')
+                  SET @ItemName = REPLACE(@ItemName, ' Doca ', ' DOCa ')
+                  SET @ItemName = REPLACE(@ItemName, ' Dop ', ' DOP ')
+                  SET @ItemName = REPLACE(@ItemName, ' Igp ', ' IGP ')
+                  SET @ItemName = REPLACE(@ItemName, ' Vdp ', ' VdP ')
+                  SET @ItemName = REPLACE(@ItemName, ' Qba ', ' QbA ')
+                  SET @ItemName = REPLACE(@ItemName, ' Igt ', ' IGT ')
+                  SET @ItemName = REPLACE(@ItemName, ' Ii ', ' II ')
+                  SET @ItemName = REPLACE(@ItemName, ' Iii ', ' III ')
+                  SET @ItemName = TRIM(@ItemName)
+                  SET @Size = Lookup("EDAP_Item","PACKAGE_TYPE","Item_Code",@ItemCode)
+                  SET @category = Lookup("EDAP_Item","CATEGORY","Item_Code",@ItemCode)
+                  SET @price = Lookup("EDAP_ItemStore_RealTimeInventory", "price", "Item_Code", @ItemCode, "Store_key", @ETPreferredStore)
+
+                  IF NOT empty(@pctdisc) THEN
+                    SET @DPrice = MULTIPLY(@price,@pctdisc)
+                    SET @DiscPrice = FormatNumber(Add(@DPrice,.01), "C2", "en-US")
+                  ELSE
+                    VAR @DiscPrice
+                  ENDIF
+
+                  ]%%
+          <td class="mpad5" align="center" valign="top" style="padding:10px;width:50%;">
+            <table cellpadding="0" cellspacing="0" border="0" style="background-color:#fff;width:100%;border:1px solid #ddd;">
+              <tr>
+                <td class="itempad" style="padding:30px 15px 15px;" align="center" valign="middle">
+                  <a href="%%=redirectto(@Itemlink)=%%" mc-deep-link="false" target="_blank" style="border:0;text-decoration:none;">
+                    <img src="%%=v(@httpsItemImage)=%%" width="140" style="width:80%;max-width:140px;margin:0 auto;">
+                  </a>
+                  <p class="itemname" style="font-family:'Source Sans Pro',Arial,Sans-serif;color:#282828;text-align:center;font-size:22px;margin:20px 5px 15px;font-weight:600;">
+                    %%=ProperCase(@ItemName)=%% <span style="font-weight:400;">(%%=v(@Size)=%%)</span>
+                  </p>
+                  %%[ IF NOT EMPTY(@DiscPrice) THEN]%%
+                  <p class="itemname" style="font-family:'Source Sans Pro',Arial,Sans-serif;color:#282828;text-align:center;font-size:22px;margin:20px 5px 0px;font-weight:400;">
+                    Price: <span style="text-decoration:line-through;">%%=FormatNumber(@price,"C2", "en-US")=%%</span>
+                  </p>
+                  <p class="itemname" style="font-family:'Source Sans Pro',Arial,Sans-serif;color:#fa0000;text-align:center;font-size:22px;margin:10px 5px 15px;font-weight:400;">
+                    With deal: <span style="font-weight:600;">%%=v(@DiscPrice)=%%</span>
+                  </p>
+                  %%[ ELSE ]%%
+                  <p class="itemname" style="font-family:'Source Sans Pro',Arial,Sans-serif;color:#282828;text-align:center;font-size:22px;margin:20px 5px 15px;font-weight:400;">
+                    Price: <span style="font-weight:600;">%%=FormatNumber(@price,"C2", "en-US")=%%</span>
+                  </p>
+                  %%[ ENDIF ]%%
+                  %%[IF NOT EMPTY(@itemCTA) THEN]%%
+                  <table border="0" cellspacing="0" cellpadding="0" style="width:100%;">
+                    <tr>
+                      <td align="center" style="padding:0px 0 10px">
+                        <table border="0" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td align="center" style="padding:8px 15px;-webkit-border-radius: 3px;border-radius:3px;" bgcolor="#007F73">
+                              <a href="%%=redirectto(@Itemlink)=%%" mc-deep-link="false" target="_blank" class="itembutton" style="font-size: 18px; font-family:'Source Sans Pro', Arial, Sans-Serif; text-decoration: none; color: #ffffff; border: 0px solid #007F73; display: inline-block;font-weight:600;">%%=v(@ItemCTA)=%%</a>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                  %%[ENDIF]%%
+                </td>
+              </tr>
+            </table>
+          </td>
+          %%[IF MOD(@w,2) == "0" THEN]%%
+        </tr>
+        <tr>
+          %%[ENDIF]%%
+          %%[ NEXT @w ]%%
+          %%[IF MOD(@FinalCount,2) == "1" THEN]%%
+        </tr>
+        %%[ENDIF]%%
+      </table>    
+    </td>
+  </tr>
+</table>

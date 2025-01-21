@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Total Wine & More Concierge Program</title>
+<style type="text/css">
+.shipstate {
+	display: none;
+}
+</style>
+</head>
+<body>
+%%[
+SET @rr = CreateObject("RetrieveRequest")
+SetObjectProperty(@rr,"ObjectType","Subscriber")
+AddObjectArrayItem(@rr,"Properties","ID")   
+SET @sfp = CreateObject("SimpleFilterPart")
+SetObjectProperty(@sfp,"Property","SubscriberKey")
+SetObjectProperty(@sfp,"SimpleOperator","equals")
+AddObjectArrayItem(@sfp,"Value",@subkey)
+SetObjectProperty(@rr,"Filter",@sfp)
+SET @subscriber = InvokeRetrieve(@rr,@rSStatus)
+IF RowCount( @subscriber ) < 1 THEN
+	SET @subscriberID = "nnn"
+ELSE
+	SET @subscriberID = FIELD(ROW(@subscriber,1),"ID")
+ENDIF]%%
+    <table style="border: 0px" border="0" cellpadding="0" cellspacing="0" align="center" width="600">
+  <tbody>
+        <tr>
+      <td><table border="0" cellpadding="0" cellspacing="0" width="600">
+          <tbody>
+            <tr>
+              <td colspan="5"><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/18/optin_concierge.jpg" alt="" style="display:block" border="0" width="600" height="278"></td>
+            </tr>
+            <tr>
+              <td width="25"><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/5/spacer.gif" alt="" style="display:block" border="0" width="25" height="20"></td>
+              <td width="555"><table border="0" cellpadding="0" cellspacing="0" width="555">
+                  <tbody>
+                    <tr>
+                      <td><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/5/spacer.gif" alt="" style="display:block" border="0" width="20" height="20"></td>
+                    </tr>
+                    <tr>
+                      <td align="left"><span style="FONT-FAMILY: Arial, Helvetica, sans-serif; FONT-SIZE: 16px"><strong>Thank you for your interest in Total Wine & More's Concierge Wine Sales.  </strong></span></td>
+                    </tr>
+                    <tr>
+                      <td align="left">&nbsp;</td>
+                    </tr>
+                    <tr>
+                      <td align="left"><span style="font-family: Arial, Helvetica, sans-serif; color: #000000; font-size: 14px">We've put you on the list for emails from our Wine Concierge, offering great deals on select bottlings of highly recommended wines. Remember, we'll need to take your first order by phone at <a href="tel:855-841-2752" style="text-decoration: none">(855)841-2752</a>, but once we have your information securely on file you may place future orders by email or phone, however you prefer. Watch for our next Total Wine & More Concierge Wine Sales email, coming soon!  </span></td>
+                    </tr>
+                    <tr>
+                      <td align="left">&nbsp;</td>
+                    </tr>
+                    <tr>
+                      <td align="left"><span style="FONT-FAMILY: Arial, Helvetica, sans-serif; COLOR: #000000; font-size: 14px">For more information about our Concierge Sales, email us at <a href="mailto:conciergesales@totalwine.com" style="color:#660000; text-decoration: none">conciergesales@totalwine.com</a>.</span></td>
+                    </tr>
+                    <tr>
+                      <td><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/5/spacer.gif" alt="" style="display:block" border="0" width="20" height="20"></td>
+                    </tr>
+                  </tbody>
+                </table></td>
+              <td width="20"><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/5/spacer.gif" alt="" style="display:block" border="0" width="20" height="20"></td>
+            </tr>
+          </tbody>
+        </table></td>
+    </tr>
+      </tbody>
+</table>
+    <img src="http://www.offeredby.net/silver/track/rvm.cfm?cid=28448&aid=1038&oid=%%=V(@subscriberID)=%%&quantity=1" height="1" width="1">
+</body>
+</html>

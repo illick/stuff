@@ -1,0 +1,492 @@
+%%[/*<div style="display:none">*/
+set @alt= "Summer's Best 4+ Star Sips"
+/*</div>*/]%%
+<table cellpadding="0" cellspacing="0" border="0" width="600" style="width:100%;">
+  <tr>
+    <td>  
+      <a href="#" border="0">
+        <img src="https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/574abdf3-6722-4b05-b3d5-425882949e01.jpg" height="auto" width="600" style="width:100%;display:block;padding:0px;text-align:center;font-size:35px;line-height:40px;color:#383838;" title="%%=v(@alt)=%%" alt="%%=v(@alt)=%%" border="0">
+      </a>
+    </td>
+  </tr>
+</table>
+                      
+                      
+%%[
+/*<div style="display:none;">*/
+
+SET @PrefWineSubCat = LOOKUP("4StarWines_SubcategoryMatch", "Subcategory", "LoyaltyNumber", @loyaltynum)
+SET @PrefSpiritsSubCat = LOOKUP("4StarSpirits_SubcategoryMatch", "Subcategory", "LoyaltyNumber", @loyaltynum)
+SET @WineAUP = LOOKUP("Wine AUP Lookup", "AvgSalesUnitPrice", "LOYALTY_CARD_NUM", @loyaltynum)
+SET @SpiritsAUP = LOOKUP("Spirits AUP Lookup", "AUP", "LoyaltyNumber", @loyaltynum)
+IF NOT EMPTY(LOOKUP("has_bought_spirits", "EmailAddress", "EmailAddress", @SubscriberEmail)) THEN
+  SET @HasBoughtSpirits = TRUE
+ELSE
+  SET @HasBoughtSpirits = FALSE
+ENDIF
+IF NOT EMPTY(LOOKUP("DepartmentPreference_Spirits", "EmailAddress", "EmailAddress", @SubscriberEmail)) THEN
+  SET @SpiritsPref = TRUE
+ELSE
+  SET @SpiritsPref = FALSE
+ENDIF
+
+/* -------- SETUP AUP BUCKETS FOR WINE -------- */
+IF NOT EMPTY(@WineAUP) THEN
+  IF @WineAUP < 15 THEN 
+    SET @WineBucket='Under15' 
+  ELSEIF @WineAUP < 25 THEN 
+    SET @WineBucket='15-25' 
+  ELSEIF @WineAUP < 40 THEN 
+    SET @WineBucket='25-40' 
+  ELSE SET @WineBucket='Over40' 
+  ENDIF 
+ELSE 
+  /* Default AUP Bucket */ 
+  SET @WineBucket='15-25' 
+ENDIF 
+
+/* -------- SETUP AUP BUCKETS FOR SPIRITS -------- */ 
+IF NOT EMPTY(@SpiritsAUP) AND @CangetSpirits THEN 
+  IF @SpiritsAUP < 30 THEN 
+    SET @SpiritsBucket='Under30' 
+  ELSEIF @SpiritsAUP < 50 THEN 
+    SET @SpiritsBucket='30-50' 
+  ELSE 
+    SET @SpiritsBucket='Over50' 
+  ENDIF 
+ELSEIF @CanGetSpirits THEN 
+  SET @SpiritsBucket='Under30' 
+ELSE VAR @SpiritsBucket 
+ENDIF 
+
+/* --------- SET DEFAULT FOR WINE --------- */ 
+IF NOT EMPTY(@PrefWineSubCat) THEN 
+  SET @FinalWinePref=@PrefWineSubCat 
+ELSE 
+  SET @FinalWinePref='Cabernet Sauvignon' 
+ENDIF 
+
+/* --------- SET DEFAULT FOR SPIRITS --------- */ 
+IF NOT EMPTY(@PrefSpiritsSubCat) AND @Cangetspirits THEN 
+  SET @FinalSpiritsPref=@PrefSpiritsSubCat 
+ELSEIF @CanGetSpirits THEN 
+  SET @FinalSpiritsPref='Spirits - Whiskey American' 
+ELSE VAR @FinalSpiritsPref 
+ENDIF 
+
+/* </div>*/ ]%% 
+    <!--<div style="padding:5px;margin:20px;border-radius:5px;background-color:#dddddd;">
+    <p style="font-family:monospace;font-size:10px;line-height:10px;padding:0;margin:2px;color:darkblue;font-weight:bold;">Subscriber Info for Testing:</p>
+    <p style="font-family:monospace;font-size:10px;line-height:10px;padding:0;margin:2px;color:darkblue;">Actual Wine Pref: %%=v(@PrefWineSubCat)=%%</p>
+    <p style="font-family:monospace;font-size:10px;line-height:10px;padding:0;margin:2px;color:darkblue;">Final Wine Pref: %%=v(@FinalWinePref)=%%</p>
+    <p style="font-family:monospace;font-size:10px;line-height:10px;padding:0;margin:2px;color:darkblue;">Wine AUP: %%=v(@WineAUP)=%%</p>
+    <p style="font-family:monospace;font-size:10px;line-height:10px;padding:0;margin:2px;color:darkblue;">Wine Bucket: %%=v(@WineBucket)=%%</p>
+    <p style="font-family:monospace;font-size:10px;line-height:10px;padding:0;margin:2px;color:darkblue;">Actual Spirits Pref: %%=v(@PrefSpiritsSubCat)=%%</p>
+    <p style="font-family:monospace;font-size:10px;line-height:10px;padding:0;margin:2px;color:darkblue;">Final Spirits Pref: %%=v(@FinalSpiritsPref)=%%</p>
+    <p style="font-family:monospace;font-size:10px;line-height:10px;padding:0;margin:2px;color:darkblue;">Spirits AUP: %%=v(@SpiritsAUP)=%%</p>
+    <p style="font-family:monospace;font-size:10px;line-height:10px;padding:0;margin:2px;color:darkblue;">Spirits Bucket: %%=v(@SpiritsBucket)=%%</p>
+    <p style="font-family:monospace;font-size:10px;line-height:10px;padding:0;margin:2px;color:darkblue;">Has Bought Spirits: %%=v(@HasBoughtSpirits)=%%</p>
+    <p style="font-family:monospace;font-size:10px;line-height:10px;padding:0;margin:2px;color:darkblue;">SpiritsPref: %%=v(@spiritsPref)=%%</p>
+  </div>-->
+  %%[
+  SET @truecount = 0
+
+  IF @spiritsPref THEN
+    /* Build Spirits List only */
+
+    SET @Itemrowset = LOOKUPORDEREDROWS("4StarWDSDProducts", 7, "AverageRating DESC", "subcategory", @FinalSpiritsPref, "ProductPriceGroup", @SpiritsBucket, "StoreKey", @ETPreferredStore)
+    SET @rowcount = ROWCOUNT(@ItemRowset)
+
+      /* Build Brand List for blocking duplicates */
+      var @BrandName1, @BrandName2, @BrandName3, @BrandName4, @BrandName5, @BrandName6, @BrandName7
+      For @i = 1 TO @rowcount DO
+        set @row = Row(@Itemrowset,@i)
+        set @ITEM_CD = Field(@row,"ItemCode")
+        IF @i == 1 THEN
+          SET @BrandName1 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ELSEIF @i == 2 THEN
+          SET @BrandName2 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ELSEIF @i == 3 THEN
+          SET @BrandName3 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ELSEIF @i == 4 THEN
+          SET @BrandName4 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ELSEIF @i == 5 THEN
+          SET @BrandName5 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ELSEIF @i == 6 THEN
+          SET @BrandName6 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ELSEIF @i == 7 THEN
+          SET @BrandName7 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ENDIF 
+      NEXT @i
+      /* End Brand List */
+
+    FOR @j=1 TO ROWCOUNT(@ItemRowset) DO
+
+      /* Checking for duplicate brands and setting a skip variable */
+      IF @j == 1 THEN
+        SET @skip = 0
+      ELSEIF @j == 2 THEN
+        IF @BrandName2 != @BrandName1 THEN
+          SET @skip = 0
+        ELSE
+          SET @skip = 1
+        ENDIF
+      ELSEIF @j == 3 THEN
+        IF @BrandName3 != @BrandName1 AND @BrandName3 != @BrandName2 THEN
+          SET @skip = 0
+        ELSE
+          SET @skip = 1
+        ENDIF
+      ELSEIF @j == 4 THEN  
+        IF @BrandName4 != @BrandName1 AND @BrandName4 != @BrandName2 AND @BrandName4 != @BrandName3 THEN
+          SET @skip = 0
+        ELSE
+          SET @skip = 1
+        ENDIF
+      ELSEIF @j == 5 THEN 
+        IF @BrandName5 != @BrandName1 AND @BrandName5 != @BrandName2 AND @BrandName5 != @BrandName3 AND @BrandName5 != @BrandName4 THEN
+          SET @skip = 0
+        ELSE
+          SET @skip = 1
+        ENDIF
+      ELSEIF @j == 6 THEN 
+        IF @BrandName6 != @BrandName1 AND @BrandName6 != @BrandName2 AND @BrandName6 != @BrandName3 AND @BrandName6 != @BrandName4 AND @BrandName6 != @BrandName5 THEN
+          SET @skip = 0
+        ELSE
+          SET @skip = 1
+        ENDIF
+      ELSEIF @j == 7 THEN
+        IF @BrandName7 != @BrandName1 AND @BrandName7 != @BrandName2 AND @BrandName7 != @BrandName3 AND @BrandName7 != @BrandName4 AND @BrandName7 != @BrandName5 AND @BrandName7 != @BrandName6 THEN
+          SET @skip = 0
+        ELSE
+          SET @skip = 1
+        ENDIF
+      ELSE
+        SET @skip = 1
+      ENDIF
+      /* End Duplicate Brands Skip */
+
+
+      SET @ItemRow = ROW(@ItemRowset, @j)
+      SET @ItemCode = FIELD(@ItemRow,"ItemCode")
+      SET @Inventory = LookUp("EDAP_ItemStore_RealTimeInventory","INVENTORY","ITEM_CODE",@ItemCode,"STORE_KEY", @ETPreferredStore)
+      IF @j == "1" THEN
+        SET @SubjectLineSubCat = Lookup("FriendlySubcategoryNames", "FriendlySingle", "Subcategory", @FinalSpiritsPref)
+      ENDIF
+      IF @Inventory >= 6 AND @skip != 1 THEN
+      ]%%
+      %%=ContentBlockByID('668319')=%%
+      %%[
+      SET @truecount = ADD(@truecount,1)
+      ENDIF
+    NEXT @j
+
+  ELSE
+    /* Build List of Wines first, then check has bought spirits */
+    SET @wineCount = 0
+    SET @Itemrowset = LOOKUPORDEREDROWS("4StarWDSDProducts", 7, "AverageRating DESC", "subcategory", @FinalWinePref, "ProductPriceGroup", @WineBucket, "StoreKey", @ETPreferredStore)
+    SET @rowcount = ROWCOUNT(@ItemRowset)
+      
+      /* Build Brand List for blocking duplicates */
+      var @BrandName1, @BrandName2, @BrandName3, @BrandName4, @BrandName5, @BrandName6, @BrandName7
+      For @i = 1 TO @rowcount DO
+        set @row = Row(@Itemrowset,@i)
+        set @ITEM_CD = Field(@row,"ItemCode")
+        IF @i == 1 THEN
+          SET @BrandName1 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ELSEIF @i == 2 THEN
+          SET @BrandName2 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ELSEIF @i == 3 THEN
+          SET @BrandName3 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ELSEIF @i == 4 THEN
+          SET @BrandName4 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ELSEIF @i == 5 THEN
+          SET @BrandName5 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ELSEIF @i == 6 THEN
+          SET @BrandName6 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ELSEIF @i == 7 THEN
+          SET @BrandName7 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ENDIF 
+      NEXT @i
+      /* End Brand List */
+
+    FOR @k=1 TO ROWCOUNT(@ItemRowset) DO
+
+      /* Checking for duplicate brands and setting a skip variable */
+      IF @k == 1 THEN
+        SET @skip = 0
+      ELSEIF @k == 2 THEN
+        IF @BrandName2 != @BrandName1 THEN
+          SET @skip = 0
+        ELSE
+          SET @skip = 1
+        ENDIF
+      ELSEIF @k == 3 THEN
+        IF @BrandName3 != @BrandName1 AND @BrandName3 != @BrandName2 THEN
+          SET @skip = 0
+        ELSE
+          SET @skip = 1
+        ENDIF
+      ELSEIF @k == 4 THEN  
+        IF @BrandName4 != @BrandName1 AND @BrandName4 != @BrandName2 AND @BrandName4 != @BrandName3 THEN
+          SET @skip = 0
+        ELSE
+          SET @skip = 1
+        ENDIF
+      ELSEIF @k == 5 THEN 
+        IF @BrandName5 != @BrandName1 AND @BrandName5 != @BrandName2 AND @BrandName5 != @BrandName3 AND @BrandName5 != @BrandName4 THEN
+          SET @skip = 0
+        ELSE
+          SET @skip = 1
+        ENDIF
+      ELSEIF @k == 6 THEN 
+        IF @BrandName6 != @BrandName1 AND @BrandName6 != @BrandName2 AND @BrandName6 != @BrandName3 AND @BrandName6 != @BrandName4 AND @BrandName6 != @BrandName5 THEN
+          SET @skip = 0
+        ELSE
+          SET @skip = 1
+        ENDIF
+      ELSEIF @k == 7 THEN
+        IF @BrandName7 != @BrandName1 AND @BrandName7 != @BrandName2 AND @BrandName7 != @BrandName3 AND @BrandName7 != @BrandName4 AND @BrandName7 != @BrandName5 AND @BrandName7 != @BrandName6 THEN
+          SET @skip = 0
+        ELSE
+          SET @skip = 1
+        ENDIF
+      ELSE
+        SET @skip = 1
+      ENDIF
+      /* End Duplicate Brands Skip */
+
+
+      SET @ItemRow = ROW(@ItemRowset, @k)
+      SET @ItemCode = FIELD(@ItemRow,"ItemCode")
+      SET @Inventory = LookUp("EDAP_ItemStore_RealTimeInventory","INVENTORY","ITEM_CODE",@ItemCode,"STORE_KEY", @ETPreferredStore)
+      IF @k == "1" AND EMPTY(@SubjectLineSubCat) THEN
+        SET @SubjectLineSubCat = Lookup("FriendlySubcategoryNames", "FriendlySingle", "Subcategory", @FinalWinePref)
+      ENDIF
+      IF @Inventory >= 6 AND @skip != 1 THEN
+      ]%%
+      %%=ContentBlockByID('668319')=%%
+      %%[
+      SET @truecount = ADD(@truecount,1)
+      SET @wineCount = ADD(@wineCount,1)
+      ENDIF
+    NEXT @k
+
+    IF @WineCount < 1 THEN
+      SET @error_message = CONCAT("Wine bottle Count is 0, True Count: ", @truecount, ", Wine: ", @FinalWinePref, " - ", @WineBucket, " Spirits: ", @FinalSpiritsPref, " - ", @SpiritsBucket)
+      InsertDE("RaiseError_log", "content_name", @content, "email", @SubscriberEmail, "error_message", @error_message)
+      RaiseError(@error_message, true)
+    ENDIF
+
+    IF @hasBoughtSpirits THEN
+      /* Add spirits here */
+      SET @Itemrowset = LOOKUPORDEREDROWS("4StarWDSDProducts", 3, "AverageRating DESC", "subcategory", @FinalSpiritsPref, "ProductPriceGroup", @SpiritsBucket, "StoreKey", @ETPreferredStore)
+      SET @rowcount = ROWCOUNT(@ItemRowset)
+
+      /* Build Brand List for blocking duplicates */
+      var @BrandName1, @BrandName2, @BrandName3, @BrandName4, @BrandName5, @BrandName6, @BrandName7
+      For @i = 1 TO @rowcount DO
+        set @row = Row(@Itemrowset,@i)
+        set @ITEM_CD = Field(@row,"ItemCode")
+        IF @i == 1 THEN
+          SET @BrandName1 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ELSEIF @i == 2 THEN
+          SET @BrandName2 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ELSEIF @i == 3 THEN
+          SET @BrandName3 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ELSEIF @i == 4 THEN
+          SET @BrandName4 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ELSEIF @i == 5 THEN
+          SET @BrandName5 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ELSEIF @i == 6 THEN
+          SET @BrandName6 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ELSEIF @i == 7 THEN
+          SET @BrandName7 = Lookup("EDAP_Item", "Brand_Name", "Item_Code", @ITEM_CD)
+        ENDIF 
+      NEXT @i
+      /* End Brand List */
+
+      /* Pre-run the bonus spirits loop to get a count to allow me to filter the divider properly */
+      SET @bonuscount=0
+      FOR @l=1 TO ROWCOUNT(@ItemRowset) DO
+
+        /* Checking for duplicate brands and setting a skip variable */
+        IF @l == 1 THEN
+          SET @skip = 0
+        ELSEIF @l == 2 THEN
+          IF @BrandName2 != @BrandName1 THEN
+            SET @skip = 0
+          ELSE
+            SET @skip = 1
+          ENDIF
+        ELSEIF @l == 3 THEN
+          IF @BrandName3 != @BrandName1 AND @BrandName3 != @BrandName2 THEN
+            SET @skip = 0
+          ELSE
+            SET @skip = 1
+          ENDIF
+        ELSEIF @l == 4 THEN  
+          IF @BrandName4 != @BrandName1 AND @BrandName4 != @BrandName2 AND @BrandName4 != @BrandName3 THEN
+            SET @skip = 0
+          ELSE
+            SET @skip = 1
+          ENDIF
+        ELSEIF @l == 5 THEN 
+          IF @BrandName5 != @BrandName1 AND @BrandName5 != @BrandName2 AND @BrandName5 != @BrandName3 AND @BrandName5 != @BrandName4 THEN
+            SET @skip = 0
+          ELSE
+            SET @skip = 1
+          ENDIF
+        ELSEIF @l == 6 THEN 
+          IF @BrandName6 != @BrandName1 AND @BrandName6 != @BrandName2 AND @BrandName6 != @BrandName3 AND @BrandName6 != @BrandName4 AND @BrandName6 != @BrandName5 THEN
+            SET @skip = 0
+          ELSE
+            SET @skip = 1
+          ENDIF
+        ELSEIF @l == 7 THEN
+          IF @BrandName7 != @BrandName1 AND @BrandName7 != @BrandName2 AND @BrandName7 != @BrandName3 AND @BrandName7 != @BrandName4 AND @BrandName7 != @BrandName5 AND @BrandName7 != @BrandName6 THEN
+            SET @skip = 0
+          ELSE
+            SET @skip = 1
+          ENDIF
+        ELSE
+          SET @skip = 1
+        ENDIF
+        /* End Duplicate Brands Skip */
+
+        SET @ItemRow = ROW(@ItemRowset, @l)
+        SET @ItemCode = FIELD(@ItemRow,"ItemCode")
+        SET @Inventory = LookUp("EDAP_ItemStore_RealTimeInventory","INVENTORY","ITEM_CODE",@ItemCode,"STORE_KEY", @ETPreferredStore)
+        IF @Inventory >= 6 AND @skip != 1 THEN
+        SET @bonuscount = ADD(@bonuscount,1)
+        ENDIF
+      NEXT @l
+      /* END PRE run Loop */
+
+      IF @bonuscount > 0 THEN
+      ]%%
+      <table align="center" cellpadding="0" cellspacing="0" border="0" style="width:auto;">
+        <tr>
+          <td class="borderline" align="right" style="width:100px;text-align:right;padding:20px 0">
+            <table cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td class="line-inner" height="5" style="width:100%;border-bottom:2px solid #BEDED6;height:5px;padding:0; margin:0;font-size:5px;line-height:5px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td class="line-inner" height="5" style="width:100px;height:5px;padding:0; margin:0;font-size:5px;line-height:5px;">&nbsp;</td>
+              </tr>
+            </table>
+          </td>
+          <td class="mobilesectiontitlefontsize" style="font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif; padding:0px 30px 0px;margin:0; text-align:center;font-weight:Normal;color:#000000;text-transform:uppercase;font-size:24px;line-height:28px;"> 
+            <a href="#" style="text-decoration:none;color: #000000;font-weight: 600;">4+&nbsp;Star&nbsp;Rated&nbsp;Spirits</a></td>
+          <td class="borderline" align="left" style="width:100px;text-align:left;padding:20px 0">
+            <table cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td class="line-inner" height="5" style="width:100%;border-bottom:2px solid #BEDED6;height:5px;padding:0; margin:0;font-size:5px;line-height:5px;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td class="line-inner" height="5" style="width:100px;height:5px;padding:0; margin:0;font-size:5px;line-height:5px;">&nbsp;</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+      %%[
+      ENDIF
+
+      FOR @l=1 TO ROWCOUNT(@ItemRowset) DO
+
+        /* Checking for duplicate brands and setting a skip variable */
+        IF @l == 1 THEN
+          SET @skip = 0
+        ELSEIF @l == 2 THEN
+          IF @BrandName2 != @BrandName1 THEN
+            SET @skip = 0
+          ELSE
+            SET @skip = 1
+          ENDIF
+        ELSEIF @l == 3 THEN
+          IF @BrandName3 != @BrandName1 AND @BrandName3 != @BrandName2 THEN
+            SET @skip = 0
+          ELSE
+            SET @skip = 1
+          ENDIF
+        ELSEIF @l == 4 THEN  
+          IF @BrandName4 != @BrandName1 AND @BrandName4 != @BrandName2 AND @BrandName4 != @BrandName3 THEN
+            SET @skip = 0
+          ELSE
+            SET @skip = 1
+          ENDIF
+        ELSEIF @l == 5 THEN 
+          IF @BrandName5 != @BrandName1 AND @BrandName5 != @BrandName2 AND @BrandName5 != @BrandName3 AND @BrandName5 != @BrandName4 THEN
+            SET @skip = 0
+          ELSE
+            SET @skip = 1
+          ENDIF
+        ELSEIF @l == 6 THEN 
+          IF @BrandName6 != @BrandName1 AND @BrandName6 != @BrandName2 AND @BrandName6 != @BrandName3 AND @BrandName6 != @BrandName4 AND @BrandName6 != @BrandName5 THEN
+            SET @skip = 0
+          ELSE
+            SET @skip = 1
+          ENDIF
+        ELSEIF @l == 7 THEN
+          IF @BrandName7 != @BrandName1 AND @BrandName7 != @BrandName2 AND @BrandName7 != @BrandName3 AND @BrandName7 != @BrandName4 AND @BrandName7 != @BrandName5 AND @BrandName7 != @BrandName6 THEN
+            SET @skip = 0
+          ELSE
+            SET @skip = 1
+          ENDIF
+        ELSE
+          SET @skip = 1
+        ENDIF
+        /* End Duplicate Brands Skip */
+
+        SET @ItemRow = ROW(@ItemRowset, @l)
+        SET @ItemCode = FIELD(@ItemRow,"ItemCode")
+        SET @Inventory = LookUp("EDAP_ItemStore_RealTimeInventory","INVENTORY","ITEM_CODE",@ItemCode,"STORE_KEY", @ETPreferredStore)
+        IF @l == "1" AND EMPTY(@SubjectLineSubCat) THEN
+          SET @SubjectLineSubCat = Lookup("FriendlySubcategoryNames", "FriendlySingle", "Subcategory", @FinalSpiritsPref)
+        ENDIF
+        IF @Inventory >= 6 AND @skip != 1 THEN
+        ]%%
+        %%=ContentBlockByID('668319')=%%
+        %%[
+        SET @truecount = ADD(@truecount,1)
+        ENDIF
+      NEXT @l
+
+    ENDIF
+
+
+
+
+
+  ENDIF
+
+  
+
+  IF @truecount < 2 THEN
+    SET @error_message = CONCAT("True Bottle Count less than 2, True Count: ", @truecount, ", Wine: ", @FinalWinePref, " - ", @WineBucket, " Spirits: ", @FinalSpiritsPref, " - ", @SpiritsBucket)
+    InsertDE("RaiseError_log", "content_name", @content, "email", @SubscriberEmail, "error_message", @error_message)
+    RaiseError(@error_message, true)
+  ENDIF
+
+  SET @subjectline = "" 
+  SET @LTASubjectLine = "Plus Deals Inside"
+  SET @LTATXSubjectLine = "Plus Deals Inside"
+  ]%%   
+
+  <!-- LTA FAUXPON -->
+  %%=ContentBlockbyID("668314")=%%
+  <!-- LTA FAUXPON -->
+
+  %%[
+  SET @current_date = Now()
+  SET @finaldate = formatdate(DATEADD(@current_date, '-2', 'D' ), "mm/dd/yyyy")
+  SET @StoreName = Lookup("store", "store_name", "store_key", @ETPreferredStore) 
+  /*</div>*/
+  ]%%
+  <table cellpadding="0" cellspacing="0" border="0" width="600" style="width:100%;">
+    <tr>
+      <td style="font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif; padding: 5px 20px;font-size:13px; font-weight: 400; line-height:auto; color:#000000;text-align:left; "> *Prices advertised are correct at date of email send on %%=v(@finaldate)=%% and <strong>valid in %%=v(@StoreName)=%% only</strong>. Product prices are limited time and subject to change. Displayed products and prices may not be available in all stores and are subject to availability. </td>
+    </tr>
+  </table>

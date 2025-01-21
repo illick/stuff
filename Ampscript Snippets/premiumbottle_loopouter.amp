@@ -1,0 +1,25 @@
+%%[
+/* Premium bottle loop with body copy */
+
+SET @LTSonly = FALSE 
+/*LTSOnly Values: TRUE/FALSE*/
+
+SET @ButtonsOn = TRUE
+/*ButtonsOn Values: TRUE/FALSE*/
+
+SET @InventoryCheck = TRUE
+/*InventoryCheck Values: TRUE/FALSE*/
+
+SET @EmptyError = FALSE
+/* EmptyError Values: TRUE/FALSE*/
+/* If there are no bottles TRUE will error the entire email, FALSE will allow an empty section */
+
+SET @ItemDE = "PremiumBottlesItemListTemplate" 
+/* ItemDE must have these columns: ItemCode, ItemCopy, SpecialPrice, All
+     All needs a default value of 1
+     SpecialPrice can be blank 
+*/
+
+]%%
+
+%%=ContentBlockByID(818830)=%%

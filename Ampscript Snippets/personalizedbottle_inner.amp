@@ -1,0 +1,190 @@
+%%[
+/* Needs @ItemCode to be provided to work */
+
+/*<div style="display:none;">*/
+  VAR @ItemImage, @httpsItemImage, @Itemlink, @ItemName, @Size, @Taste1, @Taste2, @Taste3, @region, @Style, @Varietal, @WasPricing, @ItemCategory, @ItemDepartment, @VarietalClassName, @FriendlyVarietalName, @Price, @rating, @reviews, @HighRated
+
+SET @Itemlink = "https://www.totalwine.com/p/%%=v(@ItemCode)=%%?%%=v(@web_tracking)=%%"
+SET @ItemName = Lookup("EDAP_Item","ITEM_NAME","Item_Code",@ItemCode)
+SET @Size = Lookup("EDAP_Item","PACKAGE_TYPE","Item_Code",@ItemCode)
+SET @Taste1 = Lookup("EDAP_Item","TASTE_1","Item_Code",@ItemCode)
+SET @Taste2 = Lookup("EDAP_Item","TASTE_2","Item_Code",@ItemCode)
+SET @Taste3 = Lookup("EDAP_Item","TASTE_3","Item_Code",@ItemCode)
+SET @region = Lookup("EDAP_Item","REGION","Item_Code",@ItemCode)
+SET @Style = Lookup("EDAP_Item","STYLE","Item_Code",@ItemCode)
+SET @Varietal = Lookup("EDAP_Item","VARIETAL_TYPE_DESC","Item_Code",@ItemCode)
+SET @WasPricing = Lookup("LTSMasterLookupNB","EDLP","ItemCode",@ItemCode,"StoreKey",@ETPreferredStore)
+SET @VarietalPref = LookUp("SubcatPreference_Step3_GoToSubcatAssignment", "Subcategory", "loyaltyNumber", @LoyaltyID)
+SET @ItemCategory = Lookup("EDAP_Item","SUBCATEGORY", "Item_Code", @ItemCode)
+SET @ItemDepartment = Lookup("EDAP_Item","DEPARTMENT", "Item_Code", @ItemCode)
+SET @VarietalClassName = Lookup("EDAP_Item","CLASS", "Item_Code", @ItemCode)
+SET @FriendlyVarietalName = Lookup("Varietal_FriendlyNames", "FriendlyName", "Varietal", @ItemCategory)
+
+SET @Price = Lookup("EDAP_ItemStore_RealTimeInventory","PRICE","Item_Code",@ItemCode,"STORE_KEY",@ETPreferredStore)
+
+SET @ItemImage = Lookup("HybrisImageURLs_Target","Image_140x196","ItemCode",@ItemCode)
+SET @httpsItemImage = Replace(@ItemImage,'http','https')
+IF EMPTY(@httpsItemImage) THEN
+  IF @ItemDepartment == "Beer" THEN
+    SET @httpsItemImage = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/047e725f-6863-489b-8f42-d078c30152fa.png"
+  ELSEIF @TeamDepartment == "Spirits" THEN
+    SET @httpsItemImage = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/9d262b89-4c03-4113-806d-28426b74600c.png"
+  ELSE
+    SET @httpsItemImage = "https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/d6568adb-dff5-481a-a176-0d06d71a55ff.png"
+  ENDIF
+ENDIF
+
+set @rating = LOOKUP("4StarProducts", "AverageRating", "ItemCode", @ItemCode)
+set @reviews = LOOKUP("4StarProducts", "DisplayableReviews", "ItemCode", @ItemCode)
+
+IF @rating >= 4 AND @rating < 4.1 THEN 
+  SET @stars = 'http://image.email-totalwine.com/lib/fecc157071620079/m/29/d5da3297-bc13-483b-ba6a-df725e85aead.png'
+ELSEIF @rating >= 4.1 AND @rating < 4.25 THEN 
+  SET @stars = 'http://image.email-totalwine.com/lib/fecc157071620079/m/29/712db5bb-5991-445c-8d41-680c7dbd0d4f.png'
+ELSEIF @rating >= 4.25 AND @rating < 4.45 THEN 
+  SET @stars = 'http://image.email-totalwine.com/lib/fecc157071620079/m/29/4611880e-aeea-4ade-b78f-a13e208d858c.png'
+ELSEIF @rating >= 4.45 AND @rating < 4.56 THEN 
+  SET @stars = 'http://image.email-totalwine.com/lib/fecc157071620079/m/29/515935ef-6317-4ed7-bb43-3f33375f07ce.png'
+ELSEIF @rating >= 4.56 AND @rating < 4.78 THEN 
+  SET @stars = 'http://image.email-totalwine.com/lib/fecc157071620079/m/29/2b02008a-8b92-49fa-9c78-6af8bcd053af.png'
+ELSEIF @rating >= 4.78 AND @rating < 4.98 THEN 
+  SET @stars = 'http://image.email-totalwine.com/lib/fecc157071620079/m/29/363837cc-ebdc-4365-8d4a-02f9c5e0676d.png'
+ELSEIF @rating >= 4.98 THEN 
+  SET @stars = 'http://image.email-totalwine.com/lib/fecc157071620079/m/29/f618af05-fe1f-4bd8-8f55-07bfff2dc4b2.png'
+ELSE
+  VAR @stars
+ENDIF
+
+
+SET @HighRated = lookup('AllWineRatings','Rating','ItemCode',@ItemCode) 
+                  
+IF @HighRated == '90' THEN
+  SET @RATING_BADGE = 'https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/a284bf0a-cdab-4e2c-918d-5748025f04c5.png'
+ELSEIF @HighRated == '91' THEN
+  SET @RATING_BADGE = 'https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/bbffaea8-e278-4412-a864-57360b6da784.png'
+ELSEIF @HighRated == '92' THEN
+  SET @RATING_BADGE = 'https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/768b5927-6224-474b-a0e0-321a21bac449.png'
+ELSEIF @HighRated == '93' THEN
+  SET @RATING_BADGE = 'https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/08fc0979-7814-4d2b-a710-17962b291a18.png'
+ELSEIF @HighRated == '94' THEN
+  SET @RATING_BADGE = 'https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/99281e7d-1058-4ca3-96c8-a0831f842206.png'
+ELSEIF @HighRated == '95' THEN
+  SET @RATING_BADGE = 'https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/6be518fe-5695-47da-b29d-01bfb3a68a8b.png'
+ELSEIF @HighRated == '96' THEN
+  SET @RATING_BADGE = 'https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/004da03b-cd69-4970-a71f-c8fe8291b91d.png'
+ELSEIF @HighRated == '97' THEN
+  SET @RATING_BADGE = 'https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/55713af4-3cf2-4fa2-b78e-7a3201245829.png'
+ELSEIF @HighRated == '98' THEN
+  SET @RATING_BADGE = 'https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/ec0896ae-0781-4b1b-bec8-64783e00fde5.png'
+ELSEIF @HighRated == '99' THEN
+  SET @RATING_BADGE = 'https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/931d77ad-7d3b-472e-882f-ea07cfbe38fa.png'
+ELSEIF @HighRated == '100' THEN
+  SET @RATING_BADGE = 'https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/14b7682d-f309-4897-9d7f-73df164e4009.png'
+ELSE
+  VAR @RATING_BADGE
+ENDIF
+/*</div>*/
+]%%
+
+<table align="center" cellpadding="0" cellspacing="0" border="0" width="100%">
+  <tr>
+    %%[IF NOT EMPTY(@RATING_BADGE) THEN]%%
+    <td align="center" valign="middle" class="responsive-td" width="220" style="width:180px;padding:20px 0 0 ">      
+      <a href="%%=redirectto(@Itemlink)=%%" mc-deep-link="false" target="_blank">
+        <table cellpadding="0" cellspacing="0" border="0" width="140">
+          <tr>
+            <td background="%%=v(@httpsItemImage)=%%" bgcolor="#ffffff" width="140" height="196" valign="top">
+              <!--[if gte mso 9]>
+              <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:140px;height:196px;">
+                <v:fill type="frame" src="%%=v(@httpsItemImage)=%%" color="#ffffff" />
+                <v:textbox inset="0,10px,20px,0">  <![endif]-->
+
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td align="left" style="padding:0px;text-align:left;"><img src="%%=v(@RATING_BADGE)=%%" height="40" width="40"></td>
+                  </tr>
+                </table>
+
+              <!--[if gte mso 9]>
+                </v:textbox>
+              </v:rect>
+              <![endif]-->
+            </td>
+          </tr>             
+        </table>
+      </a> 
+    </td>
+    %%[ELSE]%%
+    <td align="center" valign="middle" class="responsive-td" width="220" style="width:180px;padding:20px 0 0 ">
+      <a href="%%=redirectto(@Itemlink)=%%" mc-deep-link="false" target="_blank" style="border:0;text-decoration:none;"><img src="%%=v(@httpsItemImage)=%%" width="140" height="196" style="display: block; Margin: 0 auto; text-align: center; padding: 0; border:0;" alt="%%=v(@ItemName)=%%" title="%%=v(@ItemName)=%%" align="center" border="0"></a>
+    </td>
+    %%[ENDIF]%%
+    <td align="left" valign="middle" class="responsive-td" style="padding:20px 0 0 ">
+      <p style="margin: 0 0 10px;font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif; font-size:22px; line-height:26px; font-weight:600;color:#282828;">
+        %%=v(@ItemName)=%% <span class="fallback-body mobilecenter" align="left" valign="middle" style="font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif; font-size:20px; font-weight: 400; line-height:26px; color:#282828;">
+          (%%=v(@Size)=%%)</span>
+      </p>
+      
+      %%[IF NOT EMPTY(@rating) THEN]%%
+      <table cellpadding="0" cellspacing="0" border="0" style="display:inline-block;">
+        <tr>
+          <td style="padding:0px 5px 15px 0;">
+            <table cellpadding="0" cellspacing="0" border="0" style="display:inline-block;">
+              <tr>
+                <td align="center" valign="middle" style="background-color:#dbdbdb; border-radius:20px;margin:0;padding:5px 15px 5px 5px;font-family: 'Source Sans Pro', Arial, sans-serif;font-size:12px;line-height:12px;">
+                  <img src="https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/aafd9bfa-18a4-4080-8131-e1dfc3aa4289.png" width="17" style="display:inline-block;vertical-align: middle;"> 
+                  <p style="display:inline-block; font-family: 'Source Sans Pro', Arial, sans-serif;color:#282828;margin:0 0 0 5px;padding:0;font-size:12px;line-height:12px;font-weight:600;">4+ Star Rated</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+      %%[ENDIF]%%
+
+      %%[
+      IF @Varietal != "" or @Varietal IS NOT NULL) THEN
+        IF @ItemDepartment == "Spirits" THEN
+          SET @varietalnaming = "Spirits Type"
+        ELSE 
+          SET @varietalnaming = "Varietal"
+        ENDIF
+      ]%%
+      <p style="margin: 0 0 5px;font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif;font-size:16px;color:#282828;">%%=v(@varietalnaming)=%%: %%=propercase(@varietal)=%%</p>
+      %%[ENDIF]%%
+
+      %%[IF @Region != "" or @Region IS NOT NULL) THEN]%%
+      <p style="margin: 0 0 5px;font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif;font-size:16px;color:#282828;">Region: %%=propercase(@Region)=%%</p>
+      %%[ENDIF]%%
+
+      %%[ IF NOT EMPTY(@style) THEN ]%%
+      <p style="margin: 0 0 5px;font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif;font-size:16px;color:#282828;">Style: %%=v(@style)=%%</p>
+      %%[ENDIF]%%
+      
+      %%[IF @TASTE1 != "" or @TASTE1 IS NOT NULL THEN ]%%
+      <p class="fallback-body" style="margin: 0 0 15px;font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif;font-size:16px;color:#282828;">Tasting Notes: %%=propercase(@taste1)=%%%%[endif]%%%%[IF @TASTE2 != "" or @TASTE2 IS NOT NULL THEN]%%,&nbsp;%%=propercase(@TASTE2)=%%%%[endif]%%%%[IF @TASTE3 != "" or @TASTE3 IS NOT NULL THEN]%%,&nbsp;%%=propercase(@TASTE3)=%%%%[endif]%%</p>
+      
+      %%[ IF NOT EMPTY(@WasPricing) AND @WasPricing > @price AND INDEXOF(@content, 'PersonalizedBottleLabel') == 0 THEN ]%%
+      <p style="margin: 0 0 10px;font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif;font-size:18px;text-decoration:line-through;">Was: $%%=v(@WasPricing)=%%</p>
+      <p style="margin: 0 0 10px;font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif;font-size:18px;color: #ff2c1e; font-weight:bold;">Now at: $%%=v(@Price)=%%*</p>
+      %%[ ELSEIF NOT EMPTY(@Price) AND INDEXOF(@content, 'PersonalizedBottleLabel') == 0 THEN ]%%
+      <p style="margin: 0 0 10px;font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif;font-size:18px;color: #282828; font-weight:bold;">$%%=v(@Price)=%%*</p>
+      %%[ENDIF]%%
+      %%[IF INDEXOF(@content,'AbandonedCart') == 0 AND INDEXOF(@content, 'PersonalizedBottleLabel') == 0 THEN]%%
+      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="width:100%; height:auto">
+        <tr>
+          <td align="left" style="padding:10px 0 20px">
+            <table class="buttonholder" border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                <td align="left" class="button" style="padding:10px 20px;-webkit-border-radius: 3px;border-radius:3px;" bgcolor="#007F73">
+                  <a class="button" href="%%=redirectto(@Itemlink)=%%" mc-deep-link="false" target="_blank" style="font-size: 18px; font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif; text-decoration: none; color: #ffffff; border: 0px solid #007F73; display: inline-block;font-weight:600;text-align:center;">Shop Now</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+      %%[ENDIF]%%
+    </td>
+  </tr>
+</table>

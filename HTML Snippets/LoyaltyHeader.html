@@ -1,0 +1,44 @@
+%%[ 
+SET @Loyalty_Type = LOOKUP("store", "Loyalty_Type", "store_key", @ETPreferredStore)
+SET @loyaltyNum = LOOKUP("Loyalty_import_v2", "LOYALTY_NUMBER", "EMAIL", @SubscriberEmail)
+SET @tierlo = LOOKUP("Loyalty_import_v2", "LOYALTY_TIER", "LOYALTY_NUMBER", @loyaltyNum)
+IF @tierlo != "Grand Reserve" AND @tierlo != "Reserve" AND @tierlo != "Select" THEN
+  var @tierlo
+ENDIF
+SET @points = LOOKUP("Loyalty_import_v2", "LOYALTY_POINTS", "LOYALTY_NUMBER", @loyaltyNum)
+SET @points_to_tier = LOOKUP("Loyalty_import_v2", "POINTS_TO_NEXT_TIER", "LOYALTY_NUMBER", @loyaltyNum)
+SET @rew_amt = LOOKUP("Loyalty_import_v2", "REWARDS_EARNED", "LOYALTY_NUMBER", @loyaltyNum)
+SET @points_to_reward = LOOKUP("Loyalty_import_v2", "POINTS_TO_NEXT_REWARD", "LOYALTY_NUMBER", @loyaltyNum)
+
+IF EMPTY(@loyaltyNum) THEN
+  var @tierlo, @points, @points_to_tier, @rew_amt, @points_to_reward
+ENDIF
+
+IF @Loyalty_type == "andmore" OR @Loyalty_type == "td" THEN ]%%
+  <table cellpadding="0" cellspacing="0" border="0" width="600" bgcolor="#ffffff" style="width:100%; text-align:center; background-color:#ffffff; color:#000000;">
+    <tr>
+      <td align="center" style="padding:0;">
+        <a href="http://mi.totalwine.com/p/cp/84e274fdc94e0c29/c?mi_u=%%subscriberid%%&mi_ecmp=%%emailname_%%&mi_store=%%PreferredStore%%&mi_pricezone=%%PriceZone%%&mi_loyaltyid=%%Loyalty ID%%&amp;mi_tracking=%%=v(@web_tracking)=%%&amp;mi_loyalty_type=%%=v(@Loyalty_Type)=%%&amp;url=http%3A%2F%2Fmi.totalwine.com%2Fp%2Frp%2Fddafcc0dc603c7d6%2Furl" style="display: block;" mc-deep-link="false" alias="loyaltyheader">
+          <img alt="Display images to show real-time content" style="width:100%; border: 0; display: block;" border="0" src="http://mi.totalwine.com/p/rp/03b7f68a2229b6e1.png?mi_u=%%subscriberid%%&mi_ecmp=%%emailname_%%&mi_loyalty_number=%%loyalty ID%%&amp;mi_loyalty_type=%%=v(@Loyalty_Type)=%%&amp;mi_price_zone=%%PriceZone%%&amp;mi_store=%%PreferredStore%%&amp;mi_tier=%%=v(@tierlo)=%%&amp;mi_tracking=%%=v(@web_tracking)=%%&amp;mi_points_to_rew=%%=v(@points_to_reward)=%%&amp;mi_rew_amt=%%=v(@rew_amt)=%%">
+        </a>
+      </td>
+    </tr>
+  </table>
+  %%[
+
+  IF @Loyalty_Type == 'andmore' AND @rew_amt != "0" AND NOT empty(@tierlo) THEN
+    ]%%
+    <table cellpadding="0" cellspacing="0" border="0" width="600" bgcolor="#8b005a" style="width:100%; text-align:center; background-color:#8b005a; color:#ffffff;">
+      <tr>
+        <td align="center" style="padding:0;">
+          <a mc-deep-link="false" href="http://image.email-totalwine.com/lib/fecc157071620079/m/26/16f29165-c739-49d3-b46f-4a6b1617a44c.jpg" style="text-decoration:none;color:#ffffff;" alias="useloyaltyreward">
+            <img src="http://image.email-totalwine.com/lib/fecc157071620079/m/27/d6125d74-564f-4ca2-8358-9854199303f9.gif" style="width:100%;" border="0">
+          </a>
+        </td>
+      </tr>
+    </table>
+    %%[  
+  ENDIF
+
+ENDIF
+]%%

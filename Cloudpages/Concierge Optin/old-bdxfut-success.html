@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"><html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Thank you for your submission</title>
+
+</head>
+<body>
+%%[
+
+SET @rr = CreateObject("RetrieveRequest")
+SetObjectProperty(@rr,"ObjectType","Subscriber")
+AddObjectArrayItem(@rr,"Properties","ID")   
+
+SET @sfp = CreateObject("SimpleFilterPart")
+SetObjectProperty(@sfp,"Property","SubscriberKey")
+SetObjectProperty(@sfp,"SimpleOperator","equals")
+AddObjectArrayItem(@sfp,"Value",@subkey)
+SetObjectProperty(@rr,"Filter",@sfp)
+
+SET @subscriber = InvokeRetrieve(@rr,@rSStatus)
+
+IF RowCount( @subscriber ) < 1 THEN
+
+	SET @subscriberID = "nnn"
+	
+ELSE
+	
+	SET @subscriberID = FIELD(ROW(@subscriber,1),"ID")
+	
+ENDIF
+
+]%%
+                
+%%[<!--
+SET @tracking_name = "bordeaux_futures"
+SET @web_tracking = CONCAT("&cid=eml-", @campaign, "-", @send_date, "-", @source, "-", @tracking_name, "-&et_cid=", jobid, "&et_rid=", subscriberid )-->]%%
+<table width="600px" height="172px" border="0" cellpadding="0" cellspacing="0" class="dashedBorder" style="display:block; height: 172px; width: 600px;" bgcolor="">
+	<tbody>
+		<tr>
+			<td style="font-family: Arial; font-size: 13px; width: 600px; height: 172px; white-space: normal;" align="left" valign="middle" width="600px" height="172px" bgcolor=""><a href="http://www.totalwine.com/eng/deals/bordeaux-wine-bordeaux-futures.cfm?%%=v(@web_tracking)=%%" title="" alias="Thank You" conversion="false"><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/18/Concierge-2_172BrdxEmail.jpg" alt="Thank You!" style="display: block; width: 600px; height: 172px; margin: 0px;" title="Thank You!" mdid="ad152ecd-0a4c-404c-b803-42c115e70962" border="0" height="172" width="600"></a></td>
+		</tr>
+	</tbody>
+</table>
+<table width="600px" height="280px" border="0" cellpadding="0" cellspacing="0" class="dashedBorder" style="width: 600px; height: 280px;" bgcolor="">
+	<tbody>
+		<tr>
+			<td style="font-family: Arial; font-size: 13px; width: 600px; height: 280px; white-space: normal;" align="left" valign="middle" width="600px" height="280px" bgcolor="">
+			<table width="550px" height="250px" border="0" cellpadding="0" cellspacing="0" class="dashedBorder" style="height: 250px; width: 550px;" bgcolor="" align="center">
+				<tbody>
+					<tr>
+						<td style="font-family: Arial; font-size: 13px; width: 550px; height: 100px; white-space: normal;" align="left" valign="middle" width="550px" height="100px" bgcolor=""><span style="FONT-FAMILY: Arial, Helvetica, sans-serif; COLOR: #860d0f; FONT-SIZE: 16px"><strong>THANK YOU FOR YOUR INTEREST IN TOTAL WINE & MORE'S BORDEAUX FUTURES.</strong></span><br>
+						<br>
+						<span style="FONT-FAMILY: Arial, Helvetica, sans-serif; COLOR: #000000; FONT-SIZE: 14px">Your email address will be added to our exclusive mailing list for this program, and you will receive product announcements as soon as they are made.</span>
+						</td>
+					</tr>
+					<tr>
+						<td style="font-family: Arial; font-size: 13px; width: 550px; height: 90px; white-space: normal;" align="left" valign="middle" width="550px" height="90px" bgcolor="">
+						<table width="550px" height="90px" border="0" cellpadding="0" cellspacing="0" class="dashedBorder" style="height: 90px; width: 550px;" bgcolor="">
+							<tbody>
+								<tr>
+									<td style="font-family: Arial; font-size: 13px; width: 250px; height: 90px; white-space: normal;" align="left" valign="middle" width="250px" height="90px" bgcolor=""><span style="FONT-FAMILY: Arial, Helvetica, sans-serif; COLOR: #860d0f; FONT-SIZE: 16px"><strong>Can't wait for the 2016 vintage?</strong></span><br>
+									<span style="FONT-FAMILY: Arial, Helvetica, sans-serif; COLOR: #000000; FONT-SIZE: 14px">Shop our current Bordeaux selections now.</span></td>
+									<td style="font-family: Arial; font-size: 13px; width: 200px; white-space: normal;" align="left" valign="middle" width="200px" height="" bgcolor=""><a href="http://www.totalwine.com/wine/france/bordeaux/c/000303?plppricevalue=-30-to-40,-40-to-50,-50-above?%%=v(@web_tracking)=%%" title="" alias="Shop Bordeaux" conversion="false"><img mdid="cdbec142-ec37-488c-9243-334baa5c44bf" src="http://image.email-totalwine.com/lib/fecc157071620079/m/7/1-21_BordeauxFutures-thankyou_03-button.jpg" alt="Shop Bordeaux" style="display: block; width: 174px; height: 35px; border-color: #000000; margin: 0px;" title="Shop Bordeaux" border="0" height="35" width="174"></a></td>
+								</tr>
+							</tbody>
+						</table>
+						</td>
+					</tr>
+					<tr>
+						<td style="display:block; font-family: Arial; font-size: 13px; width: 550px; height: 50px; white-space: normal;" align="left" valign="middle" width="550px" height="50px" bgcolor=""><span style="FONT-FAMILY: Arial, Helvetica, sans-serif; COLOR: #000000; FONT-SIZE: 14px">For more information about Bordeaux Futures visit <a href="http://concierge.totalwine.com" title="www.totalwine.com/concierge" alias="www.totalwine.com/concierge" conversion="false" style="color:#660000; text-decoration: none">www.totalwine.com/concierge</a>.   Contact us by email at <a href="mailto:conciergesales@totalwine.com" style="color:#660000; text-decoration: none">conciergesales@totalwine.com</a> or by phone at <a href="tel:855-841-2752" style="text-decoration: none">(855) 841-2752</a>.</span></td>
+					</tr>
+				</tbody>
+			</table>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<img src="http://www.offeredby.net/silver/track/rvm.cfm?cid=28448&aid=1003&oid=%%=V(@subscriberID)=%%&quantity=1" height="1" width="1">
+
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Total Wine & More Concierge Program</title>
+<style type="text/css">
+.shipstate { display: none; }
+</style>
+</head>
+<body>
+<script type="text/javascript" src="http://image.email-totalwine.com/lib/fecc157071620079/m/3/jquery-1.6.1.min.js"></script>
+<script type="text/javascript">
+				function validateProfile() {
+					var strErrorMessage = '';
+					var objForm = document.frmProfile;
+					if (!IsValidEmail(objForm.EmailAddress.value)) {
+						strErrorMessage += '\u2022 Please enter a valid email address to receive our latest in-store promotions, featured products, and special event information.\n'
+					}
+					if (objForm.PreferredStore.selectedIndex == 0) {
+						strErrorMessage += '\u2022 Please select your preferred store.\n'
+					}
+					if ((objForm.PreferredStore.options[objForm.PreferredStore.selectedIndex].value == "9999") && objForm.PreferredState.value.length == 0) {
+						strErrorMessage += '\u2022 Please select your shipping state.\n';
+					}
+					if (strErrorMessage != '') {
+						alert(strErrorMessage);
+						return false;
+					} else {
+						return true;
+					}
+				}
+				function IsValidEmail(strEmail) {
+					
+					var emailReg = "^[A-Za-z0-9-._]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,4}$";
+					var regex = new RegExp(emailReg);
+					return regex.test(strEmail);
+				}
+				$(document).ready(function() { 
+					$("#PreferredStore").click( function() {
+						var value = $(this).val();
+						if(value == "9999"){
+							$(".shipstate").show();
+						} else {
+							$(".shipstate").hide();
+						}
+					});
+				});
+				</script>
+<table style="border: 1px solid #d0d0d0" border="0" cellpadding="0" cellspacing="0" align="center" width="595px">
+<tbody>
+  <tr>
+    <td>
+    <table border="0" cellpadding="0" cellspacing="0" width="600">
+      <tbody>
+        <tr>
+          <td colspan="5"><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/18/Concierge-1OptIn.jpg" alt="" style="display:block" border="0" width="600" height="278"></td>
+        </tr>
+        <tr>
+          <td bgcolor="#ffffff" width="5"><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/5/spacer.gif" alt="" style="display:block" border="0" width="5" height="30"></td>
+          <td width="20"><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/5/spacer.gif" alt="" style="display:block" border="0" width="20" height="20"></td>
+          <td>
+          <table border="0" cellpadding="0" cellspacing="0" width="550">
+            <tbody>
+              <tr>
+                <td colspan="1" align="left" height="5"></td>
+              </tr>
+              <tr>
+                <td colspan="3" align="left" style="font-family: Arial, Helvetica, sans-serif; color: #000000; font-size: 14px"><p>Would you like to have your own team of experts to tip you off to the most interesting wine deals? Meet the Total Wine & More Concierge Sales team&#44; on a mission to find the best products from the world&#39;s most talented winemakers and make these highly rated&#44; often limited&#45;production items available to discerning customers at very competitive prices&#46;</p>
+                <p>Sign up here to receive regular recommendations from our Concierge team&#46; Just register your interest below&#46; As we uncover exciting opportunities&#44; we&#39;ll email you information on our latest finds&#46; We&#39;ll only offer these special items for a limited time&#44; and the exclusive pricing offered will not be available in any of our stores&#46;</p>
+                <p>To make your first purchase&#44; simply call Concierge Sales at &#40;855&#41; 841&#45;2752&#46; We&#39;ll deliver your selections for free to your local Total Wine & More store&#46;</p>
+
+<p>Once we have your information on file&#44; we&#39;ll handle all your transactions quickly and securely via email or phone&#46;</p>
+
+
+                <form action="http://pages.email-totalwine.com/concierge" method="post" name="frmProfile" onSubmit="return validateProfile();" id="mainform">
+                  <table border="0" cellpadding="10" cellspacing="1">
+                    <tr>
+                      <td valign="top" style="font-family: Arial, Helvetica, sans-serif; color: #000000; font-size: 14px">
+                      <label for="EmailAddress">Email Address</label>
+                      </td>
+                      <td valign="top">
+                      <input id="EmailAddress" maxlength="100" size="45" name="EmailAddress" value="" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td valign="top" style="font-family: Arial, Helvetica, sans-serif; color: #000000; font-size: 14px">
+                      <label for="PreferredStore">Preferred Store</label>
+                      </td>
+                      <td valign="top">
+                      <SELECT id="PreferredStore" name="PreferredStore">
+						          <option value=""> -- Select -- </option>
+						          <option value="9999"> Shipping</option>
+						    %%[
+                            IF EMPTY(@storeid) THEN
+								SET @storeid = REQUESTPARAMETER("storeid")
+							ENDIF
+                            
+							SET @rowset = LOOKUPROWS("store","all","true")
+							SET @rowcount = ROWCOUNT(@rowset)
+							FOR @i = 1 TO @rowcount DO
+							SET @row = ROW(@rowset,@i)
+							IF FIELD(@row,'store_key') == @storeid THEN 
+							SET @selected = ' selected'
+							ELSE
+							SET @selected = ''
+							ENDIF
+							]%%
+							<option value="%%=FIELD(@row,'store_key')=%%"%%=V(@selected)=%%> %%=FIELD(@row,"store_name")=%%</option>
+							%%[
+							NEXT @i
+							]%%
+							</SELECT>
+                      </td>
+                    </tr>
+                    <tr class="shipstate">
+                      <td valign="top" style="font-family: Arial, Helvetica, sans-serif; color: #000000; font-size: 14px" >
+                      <label for="PreferredState">Ship-To State</label>
+                      </td>
+                      <td valign="top">
+                      <select Name="PreferredState" id="PreferredState">
+                        <option value="" SELECTED> -- Select --</option>
+                        <option value="Alabama"> Alabama</option>
+                        <option value="Alaska"> Alaska</option>
+                        <option value="Arizona"> Arizona</option>
+                        <option value="Arkansas"> Arkansas</option>
+                        <option value="California"> California</option>
+                        <option value="Colorado"> Colorado</option>
+                        <option value="Connecticut"> Connecticut</option>
+                        <option value="Delaware"> Delaware</option>
+                        <option value="Florida"> Florida</option>
+                        <option value="Georgia"> Georgia</option>
+                        <option value="Hawaii"> Hawaii</option>
+                        <option value="Idaho"> Idaho</option>
+                        <option value="Illinois"> Illinois</option>
+                        <option value="Indiana"> Indiana</option>
+                        <option value="Iowa"> Iowa</option>
+                        <option value="Kansas"> Kansas</option>
+                        <option value="Kentucky"> Kentucky</option>
+                        <option value="Louisiana"> Louisiana</option>
+                        <option value="Maine"> Maine</option>
+                        <option value="Maryland"> Maryland</option>
+                        <option value="Massachusetts"> Massachusetts</option>
+                        <option value="Michigan"> Michigan</option>
+                        <option value="Minnesota"> Minnesota</option>
+                        <option value="Mississippi"> Mississippi</option>
+                        <option value="Missouri"> Missouri</option>
+                        <option value="Montana"> Montana</option>
+                        <option value="Nebraska"> Nebraska</option>
+                        <option value="Nevada"> Nevada</option>
+                        <option value="New Hampshire"> New Hampshire</option>
+                        <option value="New Jersey"> New Jersey</option>
+                        <option value="New Mexico"> New Mexico</option>
+                        <option value="New York"> New York</option>
+                        <option value="North Carolina"> North Carolina</option>
+                        <option value="North Dakota"> North Dakota</option>
+                        <option value="Ohio"> Ohio</option>
+                        <option value="Oklahoma"> Oklahoma</option>
+                        <option value="Oregon"> Oregon</option>
+                        <option value="Pennsylvania"> Pennsylvania</option>
+                        <option value="Rhode Island"> Rhode Island</option>
+                        <option value="South Carolina"> South Carolina</option>
+                        <option value="South Dakota"> South Dakota</option>
+                        <option value="Tennessee"> Tennessee</option>
+                        <option value="Texas"> Texas</option>
+                        <option value="Utah"> Utah</option>
+                        <option value="Vermont"> Vermont</option>
+                        <option value="Virginia"> Virginia</option>
+                        <option value="Washington"> Washington</option>
+                        <option value="West Virginia"> West Virginia</option>
+                        <option value="Wisconsin"> Wisconsin</option>
+                        <option value="Wyoming"> Wyoming</option>
+                      </select>
+                      </td>
+                    </tr>
+                  </table>
+                  <table border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td align="left">&nbsp;
+                      <a href="linkHERE">
+                      <input id="__executionContext" type="hidden" name="__executionContext" value="Post" />
+                      <input type="image" value="Submit" class="button" src="http://image.email-totalwine.com/lib/fecc157071620079/m/18/Register+Button.jpg" alt="" style="display:block" border="0" width="156" height="30" />
+                      </a>
+                      </td>
+                    </tr>
+                  </table>
+                </FORM>
+                </td>
+              </tr>
+              <tr>
+                <td align="left"><br>
+                </td>
+                <td align="left"><br>
+                </td>
+                <td align="left"><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/5/spacer.gif" alt="" style="display:block" border="0" width="20" height="20"></td>
+                <td align="left"></td>
+              </tr>
+              <tr>
+                <td colspan="3" align="left">&nbsp;</td>
+              </tr>
+              <tr>
+                <td colspan="3" align="left"><span style="font-family: Arial, Helvetica, sans-serif; color: #000000; font-size: 14px">For more information contact our Concierge team at
+                <a href="mailto:ConciergeSales@totalwine.com">ConciergeSales@totalwine.com</a>.</span></td>
+              </tr>
+              <tr>
+                <td colspan="3"><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/5/spacer.gif" alt="" style="display:block" border="0" width="20" height="20"></td>
+              </tr>
+            </tbody>
+          </table>
+          </td>
+          <td width="20"><img src="http://image.email-totalwine.com/lib/fecc157071620079/m/5/spacer.gif" alt="" style="display:block" border="0" width="20" height="20"></td>
+		</tr>
+      </tbody>
+    </table>
+    </td>
+  </tr>
+</tbody>
+</table>
+<script type="text/javascript" src="http://pages.email-totalwine.com/Script/HttpRequest.js"></script>
+<script type="text/javascript" src="http://pages.email-totalwine.com/Script/pageTracking.js"></script>
+<script type="text/javascript">
+	absoluteBaseUrl = "http://pages.email-totalwine.com/";
+	SaveAnalyticData(104644, 'df876bb3-1826-4191-b7b7-ea5f84f3c946', '1db4c536-e895-4a0b-b264-50c986e8b2d0'); 
+</script>
+</body>
+</html>

@@ -1,0 +1,393 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Total Wine & More Concierge Program</title>
+  <style type="text/css">
+  * {
+  	box-sizing: border-box;
+  	font-family:'Source Sans Pro', Arial, sans-serif;
+
+  }	
+  .shipstate {
+    display: none;
+  }
+  body {
+  	background-color:#dedede;
+  	padding:20px;
+  	text-align:center;
+  	font-size:16px;
+  }
+  .container {
+  	width:100%;
+  	max-width:600px;
+  	border:1px solid #777777;
+  	background-color:#fafafa;
+  	color:#202020;
+  	margin:0 auto;
+  }
+  .content {
+  	padding:20px;
+  }
+  .footer {
+  	font-size:14px;color:#555555;
+  	margin-top:30px;
+  	margin-bottom:0px;
+  	text-align:center;
+  }
+  img {
+  	width:100%;
+  	display:inline-block;
+  }
+  p {
+  	text-align: left;
+  }
+  </style>
+</head>
+
+<body>
+<div class="container">
+	<img src="http://image.email-totalwine.com/lib/fecc157071620079/m/18/Concierge-1OptIn.jpg">
+	<div class="content">
+%%[
+IF @status == "Post" THEN
+
+ VAR @sub, @attr, @list, @statusCode, @statusMsg, @subKey, @errorCode, @newUser
+
+ SET @subKey = RequestParameter("EmailAddress")
+ 
+ //////////////////////////////////////////////////////////
+ //
+ // Check Existing User
+ //
+ //////////////////////////////////////////////////////////
+ 
+ SET @rr = CreateObject("RetrieveRequest")
+ SetObjectProperty(@rr,"ObjectType","Subscriber")
+ AddObjectArrayItem(@rr,"Properties","ID")   
+ 
+ SET @sfp = CreateObject("SimpleFilterPart")
+ SetObjectProperty(@sfp,"Property","SubscriberKey")
+ SetObjectProperty(@sfp,"SimpleOperator","equals")
+ AddObjectArrayItem(@sfp,"Value",@subkey)
+ SetObjectProperty(@rr,"Filter",@sfp)
+ 
+ SET @subscriber = InvokeRetrieve(@rr,@rSStatus)
+ 
+ SET @subCount = RowCount ( @subscriber )
+ 
+ IF @subCount < 1 THEN
+ 
+  SET @newUser = "true"
+  
+ ELSE
+  
+  SET @newUser = "false"
+  
+  IF FIELD(ROW(@subscriber,1),"Status") != "Unsubscribed" THEN
+   SET @subStatus = "true"
+  ENDIF
+  
+ ENDIF
+ 
+ //////////////////////////////////////////////////////////
+ //
+ // Check ProdList Subscription Status
+ //
+ //////////////////////////////////////////////////////////
+ 
+ IF @newUser == "false" THEN
+ 
+  SET @rr = CreateObject("RetrieveRequest")
+  SetObjectProperty(@rr,"ObjectType","ListSubscriber")  
+  AddObjectArrayItem(@rr,"Properties","ListID")
+  AddObjectArrayItem(@rr,"Properties","Status")
+  
+  SET @sfp = CreateObject("SimpleFilterPart")
+  SetObjectProperty(@sfp,"Property","SubscriberKey")
+  SetObjectProperty(@sfp,"SimpleOperator","equals")
+  AddObjectArrayItem(@sfp,"Value",@subkey)
+  SetObjectProperty(@rr,"Filter",@sfp)
+  
+  SET @list = InvokeRetrieve(@rr,@rLStatus)
+  
+  FOR @c = RowCount(@list) DOWNTO 1  DO    
+   SET @listStatus = Row(@list,@c)   
+   SET @listID = Field(@listStatus,'ListID')      
+   SET @status = Field(@listStatus,'Status')
+   
+   IF @listID == "177810" AND @status != "Unsubscribed" THEN
+    SET @prodSubStatus = "true"
+   ENDIF
+   
+   IF @listID == "177810" THEN
+    SET @onList = "true"
+   ENDIF
+   
+  NEXT @c
+  
+ ENDIF
+ 
+ //////////////////////////////////////////////////////////
+ //
+ // Define Subscriber Attributes
+ //
+ //////////////////////////////////////////////////////////
+ 
+ SET @sub = CreateObject("Subscriber")
+ SetObjectProperty(@sub, "SubscriberKey", @subKey)
+ SetObjectProperty(@sub, "EmailAddress", RequestParameter("EmailAddress"))
+ SetObjectProperty(@sub, "Status", "Active" )
+
+ IF NOT EMPTY(RequestParameter("PreferredStore")) THEN
+ 
+  SET @attr = CreateObject("Attribute")
+  SetObjectProperty(@attr, "Name", "PreferredStore")
+  SetObjectProperty(@attr, "Value", RequestParameter("PreferredStore"))
+  AddObjectArrayItem(@sub, "Attributes", @attr)
+  
+  SET @attr = CreateObject("Attribute")
+  SetObjectProperty(@attr, "Name", "PriceZone")
+  IF RequestParameter("PreferredStore") == "9999" THEN
+   SetObjectProperty(@attr, "Value", "9999")
+  ELSE
+   var @PriceZone
+   SET @PriceZone = LookUp("store", "price_zone_key", "store_key", RequestParameter("PreferredStore"))
+   SetObjectProperty(@attr, "Value", @PriceZone)
+  ENDIF
+  AddObjectArrayItem(@sub, "Attributes", @attr)
+  
+  SET @attr = CreateObject("Attribute")
+  SetObjectProperty(@attr, "Name", "PreferredState")
+  IF RequestParameter("PreferredStore") == "9999" THEN
+   SetObjectProperty(@attr, "Value", RequestParameter("PreferredState"))
+  ELSE
+   SetObjectProperty(@attr, "Value", "")
+  ENDIF
+  AddObjectArrayItem(@sub, "Attributes", @attr)
+  
+ ENDIF
+
+ SET @attr = CreateObject("Attribute")
+ SetObjectProperty(@attr, "Value", "Y")
+ SetObjectProperty(@attr, "Name", "Concierge_Sales")
+ AddObjectArrayItem(@sub, "Attributes", @attr)
+ 
+ SET @attr = CreateObject("Attribute")
+ SetObjectProperty(@attr, "Name", "ChannelMemberID")
+ SetObjectProperty(@attr, "Value", "105927")
+ AddObjectArrayItem(@sub, "Attributes", @attr)
+
+ IF @newUser == "true" THEN
+
+  SET @attr = CreateObject("Attribute")
+  SetObjectProperty(@attr, "Name", "Offers")
+  SetObjectProperty(@attr, "Value", "N")
+  AddObjectArrayItem(@sub, "Attributes", @attr)
+  
+  SET @attr = CreateObject("Attribute")
+  SetObjectProperty(@attr, "Name", "Events")
+  SetObjectProperty(@attr, "Value", "N")
+  AddObjectArrayItem(@sub, "Attributes", @attr)
+        
+        SET @attr = CreateObject("Attribute")
+  SetObjectProperty(@attr, "Name", "Bordeaux_Futures")
+  SetObjectProperty(@attr, "Value", "N")
+  AddObjectArrayItem(@sub, "Attributes", @attr)
+ 
+  SET @attr = CreateObject("Attribute")
+  SetObjectProperty(@attr, "Name", "How Received")
+  SetObjectProperty(@attr, "Value", "Concierge_Sales")
+  AddObjectArrayItem(@sub, "Attributes", @attr)
+  
+  SET @attr = CreateObject("Attribute")
+  SetObjectProperty(@attr, "Name", "date_added")
+  SetObjectProperty(@attr, "Value", Format(Now(),"M/d/yyyy"))
+  AddObjectArrayItem(@sub, "Attributes", @attr)
+
+ ELSE
+ 
+  IF @prodSubStatus == "false" OR @subStatus == "false" THEN
+  
+   SET @attr = CreateObject("Attribute")
+   SetObjectProperty(@attr, "Name", "Offers")
+   SetObjectProperty(@attr, "Value", "N")
+   AddObjectArrayItem(@sub, "Attributes", @attr)
+   
+   SET @attr = CreateObject("Attribute")
+   SetObjectProperty(@attr, "Name", "Events")
+   SetObjectProperty(@attr, "Value", "N")
+   AddObjectArrayItem(@sub, "Attributes", @attr)
+   
+   SET @attr = CreateObject("Attribute")
+   SetObjectProperty(@attr, "Name", "Bordeaux_Futures")
+   SetObjectProperty(@attr, "Value", "N")
+   AddObjectArrayItem(@sub, "Attributes", @attr)
+  
+  ENDIF
+
+ ENDIF
+  
+ //////////////////////////////////////////////////////////
+ //
+ // Create List
+ //
+ //////////////////////////////////////////////////////////
+ 
+ SET @list = CreateObject("SubscriberList")
+ SetObjectProperty(@list, "Status", "Active")
+ SetObjectProperty(@list, "ID", "177810")
+ IF @onList == "true" THEN
+  SetObjectProperty(@list, "Action", "update")
+ ELSE
+  SetObjectProperty(@list, "Action", "create")
+ ENDIF
+ AddObjectArrayItem(@sub, "Lists", @list)
+ 
+ //////////////////////////////////////////////////////////
+ //
+ // Create user
+ //
+ //////////////////////////////////////////////////////////
+ 
+ IF @newUser == "true" THEN
+ 
+  SET @statusCode = InvokeCreate(@sub, @statusMsg, @errorCode)
+ 
+ ELSE
+
+  SET @statusCode = InvokeUpdate(@sub, @statusMsg, @errorCode)
+  
+ ENDIF 
+
+ IF @statusCode != "OK" THEN
+  @errorStatus = "true"
+ ELSE
+ 
+  //////////////////////////////////////////////////////////
+  //
+  // Generate Email
+  //
+  //////////////////////////////////////////////////////////
+ 
+  VAR @ts, @tsDef, @ts_sub, @ts_attr, @tsctr, @ts_subkey, @ts_statusCode, @ts_statusMsg, @owner, @client
+   
+  
+  SET @ts = CreateObject("TriggeredSend")
+  SET @tsDef = CreateObject("TriggeredSendDefinition")
+  
+  SetObjectProperty(@tsDef, "CustomerKey", "67037")
+  SetObjectProperty(@ts, "TriggeredSendDefinition", @tsDef)
+   
+  SET @ts_sub = CreateObject("Subscriber")
+  SetObjectProperty(@ts_sub, "EmailAddress", @subKey)
+  SetObjectProperty(@ts_sub, "SubscriberKey", @subKey)
+   
+  SET @owner = CreateObject("Owner") 
+  SET @client = CreateObject("ClientID") 
+  
+  SetObjectProperty(@client, "ID", "105927")
+  SetObjectProperty(@owner, "Client", @client)
+  SetObjectProperty(@ts_sub, "Owner", @owner)
+  
+  AddObjectArrayItem(@ts, "Subscribers", @ts_sub)
+  SET @ts_statusCode = InvokeCreate(@ts, @ts_statusMsg, @ts_errorCode)
+  
+  IF @ts_statusCode != "OK" THEN
+   @errorStatus = "true"
+  ENDIF
+
+ ENDIF
+ 
+ IF @errorStatus == "true" THEN
+  //Error
+]%%
+
+<h1>Oops!</h1>
+<p style="text-align: center;">There was an error processing your request.</p>
+<p>StatusCode: %%=V(@statusCode)=%%<br>
+StatusMessage: %%=V(@statusMsg)=%%<br>
+ErrorCode: %%=V(@errorCode)=%%<br>
+NewUser: %%=V(@newUser)=%% <br>
+OnProdList: %%=V(@onList)=%%<br>
+AllSubStatus: %%=V(@subStatus)=%%<br>
+ProdSubStatus: %%=V(@prodSubStatus)=%%<br>
+RetrieveSubStatus: %%=V(@rSStatus)=%%<br>
+RetrieveListStatus: %%=V(@rLStatus)=%%<br>
+<br>
+Email Status<br>
+StatusCode: %%=V(@ts_statusCode)=%%<br>
+StatusMessage: %%=V(@ts_statusMsg)=%%<br>
+ErrorCode: %%=V(@ts_errorCode)=%%<br></p>
+
+%%[
+ ELSE
+  //Success
+]%%
+
+<h1>Thank you for your interest in Total Wine & More's Concierge Wine Sales.</h1>
+<p>We've put you on the list for emails from our Wine Concierge, offering great deals on select bottlings of highly recommended wines. Remember, we'll need to take your first order by phone at <a href="tel:855-841-2752" style="text-decoration: none; font-weight: bold; color:#000000">(855)841-2752</a>, but once we have your information securely on file you may place future orders by email or phone, however you prefer. Watch for our next Total Wine & More Concierge Wine Sales email, coming soon!</p>
+
+
+%%[
+ ENDIF
+ 
+ELSE /* Status does not equal POST */
+ //Form
+]%%
+
+<p>Would you like to have your own team of experts to tip you off to the most interesting wine deals? Meet the Total Wine & More Concierge Sales team&#44; on a mission to find the best products from the world&#39;s most talented winemakers and make these highly rated&#44; often limited&#45;production items available to discerning customers at very competitive prices&#46;</p>
+<p>Sign up here to receive regular recommendations from our Concierge team&#46; Just register your interest below&#46; As we uncover exciting opportunities&#44; we&#39;ll email you information on our latest finds&#46; We&#39;ll only offer these special items for a limited time&#44; and the exclusive pricing offered will not be available in any of our stores&#46;</p>
+<p>To make your first purchase&#44; simply call Concierge Sales at &#40;855&#41; 841&#45;2752&#46; We&#39;ll deliver your selections for free to your local Total Wine & More store&#46;</p>
+<p>Once we have your information on file&#44; we&#39;ll handle all your transactions quickly and securely via email or phone&#46;</p>
+
+%%[
+ENDIF
+]%%
+
+
+<p class="footer">For more information contact our Concierge team at <a href="mailto:ConciergeSales@totalwine.com" style="text-decoration: none; font-weight: bold; color:#000000">ConciergeSales@totalwine.com</a>.</p>
+	</div>
+</div>
+
+  <script type="text/javascript" src="http://image.email-totalwine.com/lib/fecc157071620079/m/3/jquery-1.6.1.min.js"></script>
+  <script type="text/javascript">
+  function validateProfile() {
+    var strErrorMessage = '';
+    var objForm = document.frmProfile;
+    if (!IsValidEmail(objForm.EmailAddress.value)) {
+      strErrorMessage += '\u2022 Please enter a valid email address to receive our latest in-store promotions, featured products, and special event information.\n'
+    }
+    if (objForm.PreferredStore.selectedIndex == 0) {
+      strErrorMessage += '\u2022 Please select your preferred store.\n'
+    }
+    if ((objForm.PreferredStore.options[objForm.PreferredStore.selectedIndex].value == "9999") && objForm.PreferredState.value.length == 0) {
+      strErrorMessage += '\u2022 Please select your shipping state.\n';
+    }
+    if (strErrorMessage != '') {
+      alert(strErrorMessage);
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  function IsValidEmail(strEmail) {
+
+    var emailReg = "^[A-Za-z0-9-._]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,4}$";
+    var regex = new RegExp(emailReg);
+    return regex.test(strEmail);
+  }
+  $(document).ready(function() {
+    $("#PreferredStore").click(function() {
+      var value = $(this).val();
+      if (value == "9999") {
+        $(".shipstate").show();
+      } else {
+        $(".shipstate").hide();
+      }
+    });
+  });
+  </script>
+</body>

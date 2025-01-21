@@ -1,0 +1,179 @@
+%%[
+set @rows = LookupOrderedRows("LTA_OFFERS_IMPORT",0,"DisplayOrder Asc","LoyaltyCardNumber",@LoyaltyNum)
+SET @rowcount = Rowcount(@rows)
+IF @rowcount == 0 THEN
+  set @error_message = 'no deals in file'
+  InsertDE("RaiseError_log", "content_name", @content, "email", @SubscriberEmail, "SubscriberKey", @SubscriberKey, "error_message", @error_message)
+  RaiseError(@error_message, true)
+ENDIF
+SET @operator = 0
+FOR @cntr = 1 to @rowcount do
+  set @ExpirationDate = Field(Row(@rows, @cntr),'ExpirationDate')
+  set @VisibleStartDate = Field(Row(@rows, @cntr),'VisibleStartDate')
+  set @OfferStatus = Field(Row(@rows, @cntr),'OfferStatus')
+  set @ExpirationDateShort = FormatDate(@ExpirationDate,"s")
+  set @HybrisPromotionId = Field(Row(@rows, @cntr),'HybrisPromotionId')
+  set @store = Field(Row(@rows, @cntr),'store')
+  set @OfferID = Field(Row(@rows, @cntr),'OfferId')
+  
+  set @Offer = Lookup("Load_to_Account_Promotion_Info","offer","hybris_code", @HybrisPromotionId)
+  set @Offer_details = Lookup("Load_to_Account_Promotion_Info","Offer_details","hybris_code", @HybrisPromotionId)
+  set @offer_type = Lookup("Load_to_Account_Promotion_Info","offer_type","hybris_code", @HybrisPromotionId)
+  set @item_code = Lookup("Load_to_Account_Promotion_Info","item_code","hybris_code", @HybrisPromotionId)
+  set @provided_image = Lookup("Load_to_Account_Promotion_Info","offer_image_URL","hybris_code", @HybrisPromotionId)
+
+  SET @Item_Image = Lookup("HybrisImageURLs_Target","Image_140x196","ItemCode",@item_code)
+  SET @httpsItemImage = Replace(@Item_Image,'http','https')
+
+  VAR @deeplinkblock
+  
+  IF IndexOf(@HybrisPromotionId,"LTA_QUOTIENT_CB") != 0 THEN
+    set @get_offer_link = "https://totalwine.onelink.me/uqDX/46848d5d?%%=v(@web_tracking)=%%&af_ad=%%=v(@campaign)=%%"
+  ELSE
+    set @hash = SHA256(CONCAT(@LoyaltyNum,@OfferID,"GRAPEVINE"))
+    set @get_offer_link = CONCAT("https://totalwine.onelink.me/uqDX/46848d5d?OfferID=", @OfferID, "&LoyaltyID=", @LoyaltyNum, "&hash=", @hash, "&af_ad=", @campaign, "&", @web_tracking)
+  ENDIF 
+ 
+  set @shop_now_link = Lookup("Load_to_Account_Promotion_Info","link","hybris_code", @HybrisPromotionId)
+  IF EMPTY(@shop_now_link) THEN
+    IF @Item_Code != "" AND NOT EMPTY(@item_code) THEN
+      SET @shop_now_link = CONCAT("https://www.totalwine.com/p/",@Item_Code, '?', @web_tracking)
+      SET @deeplinkblock = "mc-deep-link='false'"
+    ELSE
+      SET @shop_now_link = "https://totalwine.onelink.me/uqDX/nec7l0wp?%%=v(@web_tracking)=%%&af_ad=%%=v(@campaign)=%%"
+    ENDIF
+  ELSEIF IndexOf(@shop_now_link,'?') > 0 then 
+      Set @shop_now_link = CONCAT(@shop_now_link,'&',@web_tracking)
+  else 
+      Set @shop_now_link = CONCAT(@shop_now_link,'?',@web_tracking)
+  endif 
+
+  IF @Item_Code != "" AND NOT EMPTY(@item_code) THEN
+    set @offer_image = @httpsItemImage
+    set @image_width = '120'
+  ELSEIF @provided_image != "" AND NOT EMPTY(@provided_image) THEN
+    set @offer_image = @provided_image
+    set @image_width = '140'
+  ELSE
+    set @offer_image = Lookup("LTA_offer_images","image_URL","offer_type",@offer_type)
+    set @image_width = '140'
+  ENDIF
+
+  IF 
+    NOT Empty(@Offer) 
+    AND (@offerstatus=='active' OR @OfferStatus=='eligible') 
+    AND (Empty(@visiblestartdate) OR dateDiff(@visiblestartdate,NOW(),'D') >= 0) 
+    AND @HybrisPromotionId != "LTA_LOYALTYBENEFITS_2024_GIFTBAG_R" 
+    AND @HybrisPromotionId != "LTA_LOYALTYBENEFITS_2024_GIFTBAG_GR" 
+    AND @HybrisPromotionId != "LTA_LOYALTYBENEFITS_2024_MAGAZINE" 
+    AND @HybrisPromotionId != "LTA_LOYALTYBENEFITS_2024_CLASS_GR" 
+    AND @HybrisPromotionId != "LTA_LOYALTYBENEFITS_2024_CLASS_R" 
+    AND (FormatDate(@ExpirationDate, "m/d/yyyy") == @DesiredExpDate)
+  THEN
+    SET @operator = ADD(@operator,1)
+    IF @operator == 1 THEN 
+      SET @DealSL = @Offer
+      IF @StoreState == 'TX' THEN
+        set @SubjectLine = @LTATXSubjectLine
+        set @dashedline = "solid"
+      ELSE
+        set @SubjectLine = @LTASubjectLine
+        set @dashedline = "dashed"
+      ENDIF
+    ENDIF
+    IF @operator <= 10 THEN 
+    ]%%
+    <table cellpadding="0" cellspacing="0" border="0" width="620" align="center" style="width:100%;">
+      <tr>
+        <td style="padding:10px;border:0px;">
+          
+          <table cellpadding="0" cellspacing="0" border="0" style="width: 100%; border:%%=v(@dashedline)=%% 1px #000000;">
+            <tr>
+              <td>
+                <table cellpadding="0" cellspacing="0" border="0" style="width:100%;">
+                  <tr>
+                    <td align="center" valign="center" style="width: 40px;padding:10px;background-color:#efefef;font-family:'Source Sans Pro', Arial, sans-serif;"><img src="https://image.email-totalwine.com/lib/fecc157071620079/m/30/fef7c5f4-d596-40ea-82fa-0852dacabb3e.png" width="30" style="width:30px; display: inline-block;"></td>
+                    <td align="left" valign="center" style="padding:10px;background-color:#efefef;font-family:'Source Sans Pro', Arial, sans-serif;font-size:18px;font-weight:bold;line-height:1em;color:#282828;">%%=Propercase(Replace(@offer,"¬Æ","®"))=%%</td>
+                  </tr>
+                </table>
+                <table cellpadding="0" cellspacing="0" border="0" style="width:100%;direction:rtl;">
+                  <tr>
+                    <td align="center" valign="middle" class="responsive-td" style="padding: 5px 10px 10px 10px; direction:ltr;">
+                      <img src="%%=v(@offer_image)=%%" width="140" style="width:%%=v(@image_width)=%%; margin:0 auto;">
+                    </td>
+                    <td align="left" valign="middle" class="responsive-td" style="padding: 0px 10px 10px 10px; direction:ltr;">
+                      <p style="font-family:'Source Sans Pro', Arial, sans-serif; padding:0; margin:10px; font-size:14px;line-height:130%;color:#282828;"><a href="#" target="_blank" style="text-decoration: none;color:#000000;">Valid in-store and online through %%=v(@ExpirationDateShort)=%%</a></p>
+                      <p style="font-family:'Source Sans Pro', Arial, sans-serif; padding:0; margin:10px; font-size:18px;line-height:130%;color:#282828;">%%=Replace(@offer_details,"¬Æ","®")=%%</p>
+                      <table width="100%" border="0" cellspacing="0" cellpadding="0" style="width:100%; height:auto">
+                        <tr>
+                          %%[IF @OfferStatus != 'active' THEN]%%
+                          <td align="left" style="padding: 10px 10px 0px 10px;">
+                            <table border="0" cellspacing="0" cellpadding="0" class="buttonholder">
+                              <tr>
+                                <td align="center" class="button" style="padding:13px 25px;-webkit-border-radius: 3px;border-radius:3px;" bgcolor="#007F73"><a class="fallback-body" href="%%=redirectto(@get_offer_link)=%%" target="_blank" style="font-size: 18px; font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif; text-decoration: none; color: #ffffff; border: 0px solid #007F73; display: inline-block;font-weight:500;">Activate Deal</a></td>
+                              </tr>
+                            </table>
+                          </td>
+                          %%[ELSE]%%
+                          <td align="left" style="padding: 10px 10px 0px 10px;">
+                            <table border="0" cellspacing="0" cellpadding="0" class="buttonholder">
+                              <tr>
+                                <td align="center" class="button" style="padding:13px 25px;-webkit-border-radius: 3px;border-radius:3px;" bgcolor="#007F73"><a class="fallback-body" href="%%=redirectto(@shop_now_link)=%%" %%=v(@deeplinkblock)=%% target="_blank" style="font-size: 18px; font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif; text-decoration: none; color: #ffffff; border: 0px solid #007F73; display: inline-block;font-weight:500;">Shop Now</a></td>
+                              </tr>
+                            </table>
+                          </td> 
+                          %%[ENDIF]%%
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <table cellpadding="0" cellspacing="0" border="0" style="width:100%;">
+                  <tr>
+                    <td bgcolor="#ffffff" align="left" valign="middle" style="font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif; font-size: 14px; color:#000000; padding: 0px 10px 10px 10px;">
+                      &#42;Some limitations apply. Offer details can be found <a href="https://www.totalwine.com/offers/coupons?%%=v(@web_tracking)=%%" style="color:#000000;" mc-deep-link="false">here</a>.
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    %%[
+    ENDIF
+  ENDIF
+NEXT @cntr
+
+IF @operator == 0 OR @rowcount == 0 THEN 
+  set @error_message = 'no eligible or active deals'
+  InsertDE("RaiseError_log", "content_name", @content, "email", @SubscriberEmail, "SubscriberKey", @SubscriberKey, "error_message", @error_message)
+  RaiseError(@error_message, true)
+ENDIF
+]%%
+
+                
+<p align="center" valign="middle" style="font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif; padding:0; margin: 10px 20px 30px 20px;font-size:15px; font-weight: 400; line-height:auto; color:#282828;">
+  Open the Total Wine App or go to <a href="https://totalwine.onelink.me/uqDX/46848d5d?%%=v(@web_tracking)=%%&af_ad=%%=v(@campaign)=%%" style="color:#000000;" mc-deep-link="false">TotalWine.com</a> to activate and redeem all your deals. 
+</p>
+    
+
+<!--LTA STEPS-->                
+%%=ContentBlockByID(668317)=%%
+           
+<table width="100%" border="0" cellspacing="0" cellpadding="0" style="width:100%; height:auto">
+ <tr>
+  <td align="center" style="padding-top: 30px; padding-bottom:30px;">
+   <table border="0" cellspacing="0" cellpadding="0">
+    <tr>
+     <td align="center" class="fallback-body" style="padding: 15px 30px;border-radius: 6px; -moz-border-radius: 6px; -webkit-border-radius: 6px;" bgcolor="#007F73"><a href="https://totalwine.onelink.me/uqDX/46848d5d?%%=v(@web_tracking)=%%&af_ad=%%=v(@campaign)=%%" target="_blank" style="font-size: 18px; font-family:'Source Sans Pro', Verdana, Arial, Sans-Serif; text-decoration: none; color: #ffffff; text-decoration: none; border: 0px solid #000000; display: inline-block;">See All Deals</a></td>
+    </tr>
+   </table>
+  </td>
+ </tr>
+</table>  

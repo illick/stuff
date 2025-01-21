@@ -1,0 +1,22 @@
+﻿Level #,Level 1,Level 2,Level 3,Level 4,Level 5,Level 6,Level 7,Level 8,Level 9
+Label,Source,Full Campaign Name,Send Date,Email Type,Email Content,Email Specifics,Business Objective,Email Trigger,Offer Type
+Goal,Who?,Name?,When?,What?,What?,What?,Why?,How?,How?
+Example Values,eml_promo,20220204_Promo_Delivery_WorldSeries_Delivery_Manual_LTA,20220204,Promo,Delivery,WorldSeries,Delivery,Manual,LTA
+,,,,,,,,,
+Possible Values,,,,Loyalty,Flash,PersonalizedLTS,Delivery,Auto,LTA
+,,,,Promo,WOTM,LTANew,Shipping,Manual,Barcode
+,,,,Event,COTM,LTAExpiring,AppDownload,,AutoApply
+,,,,GO,MBIS,ThanksgivingSelection,WD,,PromoCode
+,,,,Misc,BigGame,GiftGuide,SD,,
+,,,,,WhatsNew,Reminder,,,
+,,,,,HRWinesByPrice,VirtualTasting,,,
+,,,,,LTS,,,,
+,,,,,CustomerFaves,,,,
+,,,,,Bundles,,,,
+,,,,,Adhoc,,,,
+,,,,,Seasonal,,,,
+,,,,,YellowTag,,,,
+,,,,,Shipping,,,,
+,,,,,Delivery,,,,
+,,,,,App,,,,
+,,,,,WineAndWanderlust,,,,
