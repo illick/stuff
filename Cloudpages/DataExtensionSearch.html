@@ -1,0 +1,160 @@
+<!-- Whitelisting IPs -->
+<script runat="server">
+  Platform.Load("Core", "1");
+
+var allowedIPs = [
+  "198.167.189.56",
+  "198.167.189.57",
+  "72.66.119.38",
+  "72.66.119.39",
+  "208.185.39.242",
+  "208.185.39.243",
+  "40.117.40.254"
+];
+
+try {
+  var validIp = false;
+  for (var i = 0; i < allowedIPs.length; i++) {
+    if (allowedIPs[i] == Platform.Request.ClientIP) {
+      validIp = true;
+    }
+  }
+
+  if (validIp === false) {
+    // Request originates from wrong IP
+    throw new Error("Non-whitelisted IP");
+  } else {
+</script>
+%%[SET @showpage = TRUE]%%
+<script runat="server">
+  }
+} catch (e) {
+  // You could also redirect to an error page here.
+  // This catch-block catches any error within the try-block, so not only wrong IP addresses
+  Write(Stringify(e));
+}
+</script>
+%%[
+IF @showpage THEN
+]%%
+
+<!DOCTYPE html>
+<html>
+<head>
+ <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+ <style>
+body {
+    padding:20px;
+    font-family:'Source Sans Pro', Arial, sans-serif;
+    font-size:20px;
+    background-color:#cccccc;
+    color:#282828;
+    box-sizing:border-box;
+  }
+   .div {
+     box-sizing:border-box;
+   }
+  .inner {
+    background-color:#ffffff;
+    padding:20px;
+    max-width:800px;
+    margin:0 auto;
+  }
+  p {
+    margin:0 0 5px;
+    padding:0;
+  }
+   input {
+     padding:7px;
+     font-size:18px;
+     width:98%;
+   }
+   #submit {
+       padding:10px 30px;
+       font-size:18px;
+       border-radius:3px;
+       background-color:#007f73;
+       color:#ffffff;
+       border:1px solid #007f73;
+       width:20%;
+       margin:10px auto;
+     }
+   .header {
+     background-color:#007f73;
+     color:#ffffff;
+    padding:10px 20px;
+     max-width:800px;
+    margin:0 auto;
+     font-size:2rem;
+     text-align:center;
+   }
+@media only screen and (max-width: 480px) {
+  .mobile-hidden {
+    display: none !important;
+  }
+  .responsive-td {
+    width: 100% !important;
+    display: block !important;
+    padding: 0 !important;
+  }
+
+</style>
+
+  %%[
+  /*<div style="display:none;">*/
+  SET @DEName = RequestParameter('DEName')
+  /*</div>*/
+  ]%%
+
+</head>
+<body>
+<div class="header">
+    <p>
+      Search for a DE location
+    </p>
+  </div>
+  <div class="inner"> 
+  
+  <form action="%%=CloudPagesURL(2642)=%%" method="post" id="desearch" style="width:100%;">
+    <input type="text" name="DEName" id="DEName" placeholder="Enter DE to be searched" required>
+    <input type="submit" name="submit" value="Submit" id="submit">
+  </form>
+  
+  %%[ IF EMPTY(@DEName) THEN ]%%
+  <!--Nothing--> 
+  %%[ELSE]%%  
+  <hr>  
+  <p>
+    DE Name being searched: %%=v(@DEName)=%% 
+    </p>
+  <p>
+  Folder location (Reversed): 
+<script runat="server">
+Platform.Load("core","1.1.5");
+var deName=Variable.GetValue("@DEName");
+var FolderScript= DataExtension.Retrieve({Property:"Name",SimpleOperator:"equals",Value:deName});
+({Property:"CustomerKey",SimpleOperator:"equals",Value:key}); 
+var FolderID = FolderScript[0].CategoryID;
+var results = Folder.Retrieve({Property:"ID",SimpleOperator:"equals",Value:FolderID});
+
+var folderName = results [0].Name;
+var parentFolder = results [0].ParentFolder.Name;
+var countdown = function(id) {
+    if (id> 0) {
+        var results = Folder.Retrieve({Property:"ID",SimpleOperator:"equals",Value:id});
+    Write(results [0].Name+" < ");
+        return countdown(results[0].ParentFolder.ID);
+    } else {
+        return id;
+    }
+};
+countdown(FolderID);
+</script>
+  </p>
+  %%[ENDIF]%%
+    </div>
+</body>
+</html>
+
+%%[ENDIF]%%

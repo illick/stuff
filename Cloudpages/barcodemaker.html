@@ -1,0 +1,178 @@
+<!-- Whitelisting IPs -->
+<script runat="server">
+  Platform.Load("Core", "1");
+
+var allowedIPs = [
+  "198.167.189.56",
+  "198.167.189.57",
+  "72.66.119.38",
+  "72.66.119.39",
+  "208.185.39.242",
+  "208.185.39.243",
+  "40.117.40.254"
+];
+
+try {
+  var validIp = false;
+  for (var i = 0; i < allowedIPs.length; i++) {
+    if (allowedIPs[i] == Platform.Request.ClientIP) {
+      validIp = true;
+    }
+  }
+
+  if (validIp === false) {
+    // Request originates from wrong IP
+    throw new Error("Non-whitelisted IP");
+  } else {
+</script>
+%%[SET @showpage = TRUE]%%
+<script runat="server">
+  }
+} catch (e) {
+  // You could also redirect to an error page here.
+  // This catch-block catches any error within the try-block, so not only wrong IP addresses
+  Write(Stringify(e));
+}
+</script>
+%%[
+IF @showpage THEN
+]%%
+
+<!DOCTYPE html>
+<html>
+<head>
+ <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="robots" content="noindex">
+  <meta name="robots" content="nofollow">
+  <title>TWM Barcode Maker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;600&display=swap" rel="stylesheet">
+ <style>
+   * {
+     box-sizing:border-box;
+   }
+body {
+  color: #282828;
+  font-family: 'Source Sans Pro', Arial, sans-serif;
+  font-size: 16px;
+  margin: 0 auto;
+width:100%;
+  background-color:#efefef;
+}
+   .header {
+     background-color:#007f73;
+     width:100%;
+     max-width:800px;
+     margin:0 auto;
+     padding:0px 20px;
+     text-align:center;
+   }
+   .logo {
+     margin:0 auto;
+     width:170px;
+     text-align:center;
+   }
+   .container {
+     background-color:#ffffff;
+     width:100%;
+     max-width:800px;
+     margin:0 auto;
+     padding:20px;
+   }
+   p {
+     margin:5px 20px;
+     padding:0;
+   }
+   p.headline {
+     font-size:1.7rem;
+     text-align:center;
+     font-weight:bold;
+   }
+   p.subhead {
+     margin: 10px 0;
+     font-weight:bold;
+   }
+   label {
+     display:block;
+     margin:10px 0;
+   }
+   input.submit {
+     display:block;
+     margin:10px 0;
+     color:#ffffff;
+     background-color:#007f73;
+     border:1px solid #007f73;
+     padding:5px 15px;
+     border-radius: 3px;
+     font-size:18px;
+   }
+   div.bar {
+     margin: 20px auto;
+     text-align:center;
+     width:100%;
+   }
+   img.finalcode {
+     margin:0 auto;
+     text-align:center;
+   }
+     
+@media only screen and (max-width: 480px) {
+   }
+
+</style>
+
+</head>
+<body>
+<div class="header">
+  <img class="logo" src="https://image.email-totalwine.com/lib/fe3611727164047a741476/m/1/bfe4f94b-e2dd-4b01-8597-d9fdcc22151f.png">
+  </div>  
+<div class="container">
+<p class="headline">
+  Barcode Maker
+  </p>
+  <form id="barcodemaker" method="post" action="%%=CloudPagesURL(2627)=%%">
+    <label for="barcodes">Enter barcodes here separated by a comma:</label>
+    <textarea name="barcodes" id="barcodes" rows="4" cols="50"></textarea>
+    <input class="submit" type="submit"/>
+  </form>
+  
+  
+  %%[
+  SET @Barcodes = RequestParameter("barcodes")
+  SET @barrows = BuildRowsetFromString(@barcodes)
+  ]%%
+  <hr>
+  <p class="subhead">
+    Barcodes below:
+  </p>
+  %%[
+  FOR @i = 1 to Rowcount(@barrows) do
+    SET @row = Row(@barrows, @i)
+    SET @tempcode = Field(@row,1)
+    SET @trimcode = TRIM(@tempcode)
+    SET @length = LENGTH(@trimcode)
+    IF @length == 4 THEN
+      SET @finalCode = CONCAT(@trimcode, '99999999')
+    ELSE
+      SET @finalCode = @trimcode
+    ENDIF
+    ]%%
+     <div class="bar">
+       <img class="finalcode" src="%%=BarCodeURL(@finalCode,"Code128A", 400, 70, 0)=%%">
+      </div>
+    %%[
+  NEXT @i
+  ]%%
+  
+ 
+
+
+
+     </div>
+</body>
+</html>
+%%[
+ENDIF
+]%%

@@ -1,0 +1,584 @@
+<!-- Whitelisting IPs -->
+<script runat="server">
+  Platform.Load("Core", "1");
+
+var allowedIPs = [
+  "198.167.189.56",
+  "198.167.189.57",
+  "72.66.119.38",
+  "72.66.119.39",
+  "208.185.39.242",
+  "208.185.39.243",
+  "40.117.40.254"
+];
+
+try {
+  var validIp = false;
+  for (var i = 0; i < allowedIPs.length; i++) {
+    if (allowedIPs[i] == Platform.Request.ClientIP) {
+      validIp = true;
+    }
+  }
+
+  if (validIp === false) {
+    // Request originates from wrong IP
+    throw new Error("Non-whitelisted IP");
+  } else {
+</script>
+%%[SET @showpage = TRUE]%%
+<script runat="server">
+  }
+} catch (e) {
+  // You could also redirect to an error page here.
+  // This catch-block catches any error within the try-block, so not only wrong IP addresses
+  Write(Stringify(e));
+}
+</script>
+%%[
+IF @showpage THEN
+]%%
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Email Subscriber Status Page</title>
+ <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+ <style>
+body {
+    padding:20px;
+    font-family:'Source Sans Pro', Arial, sans-serif;
+    font-size:20px;
+    background-color:#cccccc;
+    color:#282828;
+    box-sizing:border-box;
+  }
+   .div {
+     box-sizing:border-box;
+   }
+  .inner {
+    background-color:#ffffff;
+    padding:20px;
+    max-width:800px;
+    margin:0 auto;
+  }
+  p {
+    margin:0 0 5px;
+    padding:0;
+  }
+   input {
+     padding:7px;
+     font-size:18px;
+     width:98%;
+     margin: 5px 0;
+   }
+   #submit {
+       padding:10px 30px;
+       font-size:18px;
+       border-radius:3px;
+       background-color:#007f73;
+       color:#ffffff;
+       border:1px solid #007f73;
+       width:auto;
+       margin:10px auto;
+     }
+   .header {
+     background-color:#007f73;
+     color:#ffffff;
+    padding:10px 20px;
+     max-width:800px;
+    margin:0 auto;
+     font-size:2rem;
+     text-align:center;
+     font-weight:900;
+   }
+   div.alert {
+     background-color:Lightyellow;
+     color:darkgoldenrod;
+     padding:10px;
+     margin:20px;
+     text-align:center;
+     font-weight:600;
+   }
+      div.error {
+     background-color:lightpink;
+     color:crimson;
+     padding:10px;
+        margin:20px;
+     text-align:center;
+     font-weight:600;
+   }
+   div.info {
+     background-color:lightblue;
+     color:darkblue;
+     padding:10px;
+        margin:20px;
+     text-align:center;
+     font-weight:600;
+   }
+   .smallButton {
+     padding:10px 30px;
+     font-size:18px;
+     border-radius:3px;
+     background-color:#007f73;
+     color:#ffffff;
+     border:1px solid #007f73;
+     width:auto;
+     margin:10px auto;
+   }
+   .sectionTitle {
+     font-size:24px;
+     font-weight:900;
+     text-align:center;
+     background-color:#8b005a;
+     color:#ffffff;
+     padding:5px;
+     margin: 40px 0 20px;
+   }
+   .infoitem {
+     margin: 0 0 5px;
+   }
+   #content {
+    height: 300px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #000000;
+  }
+  .table-wrapper {
+    overflow-y: scroll;
+    flex-grow: 1;
+    background-color: #ffffff;
+  }
+  .table-wrapper th {
+    position: sticky;
+    top: 0;
+    font-size:.75em;
+  }
+  .table-wrapper td {
+    font-size:.75em;
+  } 
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  th {
+    background: lightgrey;
+  }
+  td,
+  th {
+    text-align: left;
+    padding: 4px 0px 5px 5px;
+  }
+ 
+  tr:nth-child(even) {
+    background-color: #dddddd;
+  }
+  td:nth-last-child() {
+    border-bottom: 0px !important;
+  }
+   .tdred {
+     background-color:lightpink;
+     color:crimson;
+   }
+   .tdgrn {
+     background-color:lightgreen;
+     color:darkgreen;
+   }
+   .tdyel {
+     background-color:Lightyellow;
+     color:darkgoldenrod;
+   }
+@media only screen and (max-width: 480px) {
+  .mobile-hidden {
+    display: none !important;
+  }
+  .responsive-td {
+    width: 100% !important;
+    display: block !important;
+    padding: 0 !important;
+  }
+
+</style>
+</head>
+<body>
+%%[/*<div style="display:none">*/
+VAR @LoyaltyNumber, @EmailAddress, @SubscriberKey, @PriceZone, @PreferredStore, @process
+set @process = REQUESTPARAMETER('process')
+SET @LoyaltyNumber = TRIM(RequestParameter('LoyaltyNumber'))
+SET @EmailAddress = TRIM(RequestParameter('EmailAddress'))
+SET @SubscriberKey = TRIM(RequestParameter('SubscriberKey'))
+
+set @today = Now()
+set @enddate = DateAdd(@today, '180', 'D')
+set @UnengagedDE = 'UnengagedSubscribers'
+set @ExclusionsDE = 'non_openers_exclusions'
+set @HoldoutDE = 'GlobalHoldoutForTesting'
+
+
+/* - - - - - -  Use Provided Info to Lookup SubscriberKey - - - - - -  */
+IF EMPTY(@LoyaltyNumber) AND EMPTY(@EmailAddress) AND EMPTY(@SubscriberKey) THEN
+  /* Nothing */
+ELSEIF NOT EMPTY(@LoyaltyNumber) THEN
+  SET @SubRows = LOOKUPROWS("MasterAllSubscribers", "Loyalty_Number", @LoyaltyNumber)
+  SET @SubCount = ROWCOUNT(@SubRows)
+  IF @SubCount == 0 THEN
+    SET @SubscriberError = "A subscriber does not exist with Loyalty Number: %%=v(@LoyaltyNumber)=%%"
+    VAR @SubscriberKey
+  ELSEIF @SubCount > 1 THEN
+    SET @SubscriberError = "%%=v(@SubCount)=%% subscribers found for Loyalty Number: %%=v(@LoyaltyNumber)=%%. <br /> Please start a Salesforce Service Cloud Case to help resolve the duplicates"
+    VAR @SubscriberKey
+  ELSE
+    SET @row = ROW(@SubRows,1)
+    SET @SubscriberKey = FIELD(@row, "SubscriberKey")
+  ENDIF
+ELSEIF NOT EMPTY(@EmailAddress) THEN
+  SET @SubRows = LOOKUPROWS("MasterAllSubscribers", "EmailAddress", @EmailAddress)
+  SET @SubCount = ROWCOUNT(@SubRows)
+  IF @SubCount == 0 THEN
+    SET @SubscriberError = "A subscriber does not exist with Email Address: %%=v(@EmailAddress)=%%"
+    VAR @SubscriberKey
+  ELSEIF @SubCount > 1 THEN
+    SET @SubscriberError = "%%=v(@SubCount)=%% subscribers found for Email Address: %%=v(@EmailAddress)=%%. <br /> Please start a Salesforce Service Cloud Case to help resolve the duplicates"
+    VAR @SubscriberKey
+  ELSE
+    SET @row = ROW(@SubRows,1)
+    SET @SubscriberKey = FIELD(@row, "SubscriberKey")
+  ENDIF
+ELSE
+  SET @EnteredSubKey = @SubscriberKey
+  SET @SubRows = LOOKUPROWS("MasterAllSubscribers", "subscriberKey", @subscriberKey)
+  SET @SubCount = ROWCOUNT(@SubRows)
+  IF @SubCount == 0 THEN
+    SET @SubscriberError = "A subscriber does not exist with SubscriberKey: %%=v(@EnteredSubKey)=%%"
+    VAR @SubscriberKey
+  ELSEIF @SubCount > 1 THEN
+    SET @SubscriberError = "%%=v(@SubCount)=%% subscribers found for SubscriberKey: %%=v(@EnteredSubKey)=%%. <br /> Please start a Salesforce Service Cloud Case to help resolve the duplicates"
+    VAR @SubscriberKey
+  ELSE
+    SET @row = ROW(@SubRows,1)
+    SET @SubscriberKey = FIELD(@row, "SubscriberKey")
+  ENDIF
+ENDIF
+
+
+IF NOT EMPTY(@SubscriberKey) THEN
+  /* - - - - - -  Retrieving subscriber info - - - - - -  */
+  /* - - - - - -  SubscriberKey as primarykey - - - - - -  */
+  SET @SubRows = LOOKUPROWS("MasterAllSubscribers", "subscriberKey", @subscriberKey)
+  SET @SubCount = ROWCOUNT(@SubRows)
+  SET @row = ROW(@SubRows,1)
+  SET @EmailAddress = FIELD(@row, "EmailAddress")
+  SET @LoyaltyNumber = FIELD(@row, "Loyalty_Number")
+  SET @loyaltyTier = Lookup("Loyalty_import_v2","Loyalty_Tier","LOYALTY_NUMBER",@LoyaltyNumber)
+  SET @PreferredStore = FIELD(@row, "preferred_store_number")  
+  SET @StoreName = LOOKUP("store","store_name","store_key", @PreferredStore)
+  SET @SubStatus = FIELD(@row, "Status") 
+
+  SET @Unengaged = Lookup(@UnengagedDE, "SubscriberKey", "SubscriberKey", @SubscriberKey)
+  IF NOT EMPTY(@Unengaged) THEN
+    SET @onUnengaged = 'Yes'
+  ELSE
+    SET @onUnengaged = 'No'
+  ENDIF
+
+  SET @Holdout = Lookup(@HoldoutDE, "SubscriberKey", "SubscriberKey", @SubscriberKey)
+  IF NOT EMPTY(@Holdout) THEN
+    SET @onHoldout = 'Yes'
+  ELSE
+    SET @onHoldout = 'No'
+  ENDIF
+  
+  /* ---- This is to get the attribute value for Offers/Events ---- */
+  set @rr = CreateObject('RetrieveRequest')
+  SetObjectProperty(@rr,'ObjectType','Subscriber')
+  AddObjectArrayItem(@rr,'Properties','ID')
+  AddObjectArrayItem(@rr,'Properties','EmailAddress')
+  AddObjectArrayItem(@rr,'Properties','SubscriberKey')
+  AddObjectArrayItem(@rr,'Properties','Status')
+  
+  set @sfp = CreateObject('SimpleFilterPart')
+  SetObjectProperty(@sfp, 'Property', 'SubscriberKey')
+  SetObjectProperty(@sfp,'SimpleOperator','equals')
+  AddObjectArrayItem(@sfp,'Value',@SubscriberKey)
+  SetObjectProperty(@rr,'Filter',@sfp)
+  
+  set @subscriber = InvokeRetrieve(@rr,@rrStatus)
+  set @subsccount = RowCount(@subscriber)
+  if @subsccount > 0 then 
+    SET @attributes = FIELD(ROW(@subscriber,1),'Attributes')
+    for @i = RowCount(@attributes) downto 1 do
+      set @att = Row(@attributes, @i)
+      set @att_name = Field(@att,'Name')
+      set @att_val = Field(@att,'Value')
+      if @att_name == 'Offers' then
+        set @offers = @att_val
+      elseif @att_name == 'Events' then
+        set @news = @att_val
+      endif
+    next @i
+  endif
+
+  if @offers == 'Y' and @news == 'Y' then
+    set @offers_news = 'Offers and Events'
+  elseif @news == 'Y' then
+    set @offers_news = 'Events Only'
+  elseif @offers == 'Y' then
+    set @offers_news = 'Offers Only'
+  else
+    set @offers_news = 'No Offers - No Events'
+  endif
+  
+  
+ENDIF
+if @process == 'removesupp' then
+  /* - - - - - -  Removing UnengagedSubscriber Suppression - - - - - -  */
+  DeleteData(@UnengagedDE,'SubscriberKey',@SubscriberKey)
+  InsertDE(@ExclusionsDE, 'EmailAddress', @EmailAddress, 'start', @today, 'end', @enddate, 'subscriberKey', @SubscriberKey)
+  set @remove_supp_output = concat(@EmailAddress,' (',@SubscriberKey,') has been removed from ', @UnengagedDE, '. <br /> Start: ', @today, ' End date: ', @enddate)  
+
+
+elseif @process == 'removeHoldoutTest' then
+  /* - - - - - -  Removing Holdout Test Suppression - - - - - -  */
+  DeleteData(@HoldoutDE,'SubscriberKey',@SubscriberKey)
+  set @remove_supp_output = concat(@EmailAddress,' (',@SubscriberKey,') has been removed from ', @HoldoutDE, '. <br /> Start: ', @today, ' End date: ', @enddate)  
+
+
+elseif @process == 'resub' then
+  /* - - - - - -  Resubscribing, removing non-opener, and resetting preferences - - - - - -  */
+  /* ------------ remove suppression ------------ */
+  DeleteData(@UnengagedDE,'SubscriberKey',@SubscriberKey)
+  InsertDE(@ExclusionsDE, 'EmailAddress', @EmailAddress, 'start', @today, 'end', @enddate, 'subscriberKey', @SubscriberKey)
+  /* ------------ remove holdout ----------- */
+  DeleteData(@HoldoutDE,'SubscriberKey',@SubscriberKey)
+  /* ------------ update subscriber status to active ------------ */
+  /* ------------ create subscriber object ------------ */
+  set @sub = CreateObject('Subscriber')
+  SetObjectProperty(@sub,'SubscriberKey',@SubscriberKey)
+  SetObjectProperty(@sub,'Status','Active')
+  /* ------------update offers to y ------------ */
+  set @attr_o = CreateObject("Attribute")
+  SetObjectProperty(@attr_o, "Name", "Offers")
+  SetObjectProperty(@attr_o, "Value", "Y")
+  AddObjectArrayItem(@sub, "Attributes", @attr_o)
+  /* ------------update events to y ------------ */
+  set @attr_e = CreateObject("Attribute")
+  SetObjectProperty(@attr_e, "Name", "Events")
+  SetObjectProperty(@attr_e, "Value", "Y")
+  AddObjectArrayItem(@sub, "Attributes", @attr_e)
+  /* ------------update sub status ------------ */
+  set @statusCode = InvokeUpdate(@sub, @statusMsg, @errorCode)
+  if @errorCode != 0 then
+    set @errorStatus = 'yes'
+  else
+    set @resub_output = concat(@EmailAddress,' (',@SubscriberKey,') has been reset')
+  endif
+  /* ------------handle error ------------ */
+  if @errorStatus == 'yes' then
+    set @error = 'Sorry an error has occurred. Please try again later.'
+  endif
+
+
+endif
+
+/*</div>*/]%%
+
+
+<div class="header">
+    <p>
+      Email Subscriber Status Page
+    </p>
+  </div>
+  <div class="inner"> 
+  <p>
+    Choose one to lookup a subscriber:
+    </p>
+  <form action="%%=CloudPagesURL(3387)=%%" method="post" id="desearch" style="width:100%;margin:0 0 40px;">
+    <input type="text" name="LoyaltyNumber" id="LoyaltyNumber" placeholder="Enter Loyalty Number">
+    <input type="text" name="EmailAddress" id="EmailAddress" placeholder="Enter Email Address">
+    <input type="text" name="SubscriberKey" id="SubscriberKey" placeholder="Enter SubscriberKey">
+    <input type="hidden" name="process" id="process" value="lookup">
+    <input type="submit" name="submit" value="Look Up Subscriber" id="submit">
+  </form>
+    
+      %%[IF NOT EMPTY(@remove_supp_output) THEN]%%
+      <div class="info">%%=treatascontent(@remove_supp_output)=%%</div>
+      %%[ENDIF]%%
+      %%[IF NOT EMPTY(@remove_holdout_output) THEN]%%
+      <div class="info">%%=treatascontent(@remove_holdout_output)=%%</div>
+      %%[ENDIF]%%
+      %%[IF NOT EMPTY(@resub_output) THEN]%%
+      <div class="info">%%=treatascontent(@resub_output)=%%</div>  
+      %%[ENDIF]%%
+      %%[IF NOT EMPTY(@SubscriberError) THEN]%%
+      <div class="alert">%%=treatascontent(@SubscriberError)=%%</div>  
+      %%[ENDIF]%%
+      %%[IF NOT EMPTY(@error) THEN]%%
+      <div class="error">%%=treatascontent(@error)=%%</div>  
+      %%[ENDIF]%%
+    
+    %%[if NOT EMPTY(@process) AND NOT EMPTY(@SubscriberKey) then]%%
+    <div class="sectionTitle">
+        Subscriber Information          
+    </div>
+    <p class="infoitem">
+      SubscriberKey: %%=v(@SubscriberKey)=%%
+    </p>
+    <p class="infoitem">
+      Email Address: %%=v(@EmailAddress)=%%
+    </p>
+    <p class="infoitem">
+      Loyalty Number: %%=v(@LoyaltyNumber)=%%
+    </p>
+    <p class="infoitem">
+      Loyalty Tier: %%=v(@LoyaltyTier)=%%
+    </p>
+    <p class="infoitem">
+      Preferred Store: %%=v(@PreferredStore)=%%
+    </p>
+    <p class="infoitem">
+      Store Name: %%=v(@StoreName)=%%
+    </p>
+    <hr>
+    <table>
+      <tr>
+        %%[
+        IF @SubStatus == "active" THEN
+          SET @tdclass = "class='tdgrn'"
+        ELSEIF @SubStatus == "unsubscribed" THEN
+          SET @tdclass = "class='tdred'"
+        ELSE 
+          SET @tdclass = "class='tdyel'"
+        ENDIF
+        ]%%
+        <td>What is the subscription status:
+        </td>
+        <td %%=v(@tdclass)=%%>%%=ProperCase(@SubStatus)=%%
+        </td>
+      </tr>
+      <tr>
+        <td>What type of emails will this address receive:
+        </td>
+        <td>%%=v(@offers_news)=%%
+        </td>
+      </tr>
+      <tr>
+        %%[
+        IF @onUnengaged == 'Yes' THEN
+          SET @tdclass = "class='tdyel'"
+        ELSE
+          SET @tdclass = "class='tdgrn'"
+        ENDIF
+        ]%%
+        <td>Is this email classified as unengaged:
+        </td>
+        <td %%=v(@tdclass)=%%>%%=v(@onUnengaged)=%%
+        </td>
+      </tr>
+      <tr>
+        %%[
+        IF @onHoldout == 'Yes' THEN
+          SET @tdclass = "class='tdyel'"
+        ELSE
+          SET @tdclass = "class='tdgrn'"
+        ENDIF
+        ]%%
+        <td>Is this email on the holdout test group:
+        </td>
+        <td %%=v(@tdclass)=%%>%%=v(@onHoldout)=%%
+        </td>
+      </tr>
+    </table>
+    
+    
+    <div class="table-container" style="margin:40px 0 0">
+      <div class="alert" style="margin:0;">
+        NOTE ON EMAIL OPENS: Some email clients cache images at send time for any email delivered to the inbox. This counts as an "open" in the system. 
+      </div>
+        <div id="content">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Sent Date</th>
+                  <th>Email Name</th>
+                  <th>Open or cached?</th>
+                  <th>Click?</th>
+                </tr>
+              </thead>
+              %%[ /*<div style="display:none">*/
+              Set @emailSends = LookupOrderedRows("_Sent",0,"EventDate desc", "SubscriberKey", @SubscriberKey)  
+              SET @emailsSentCount = ROWCOUNT(@emailSends)
+              for @instance = 1 to @emailsSentCount do
+              SET @row = Row(@emailSends,@instance)
+              SET @job = Field(@row,"JobID")
+              SET @event = Field(@row,"EventDate")
+              SET @emailName = Lookup("_job","EmailName","JOBID",@job)
+              SET @EmailCategory = Lookup("_job","Category","JOBID",@job)
+              SET @open = Lookup("_open","EventDate","JOBID",@job,"SubscriberKey", @SubscriberKey)
+              IF NOT EMPTY(@open) THEN
+                SET @didopen = "Y"
+                SET @td1class = "class='tdgrn'"
+              ELSE
+                SET @didopen = "N"
+                SET @td1class = "class='tdred'"
+              ENDIF
+              SET @click = Lookup("_click","EventDate","JOBID",@job,"SubscriberKey", @SubscriberKey)
+              IF NOT EMPTY(@click) THEN
+                SET @didclick = "Y"
+                SET @td2class = "class='tdgrn'"
+              ELSE
+                SET @didclick = "N"
+                SET @td2class = "class='tdred'"
+              ENDIF
+              
+              IF @EmailCategory == "Test Send Emails" THEN
+              /*Skip this row */
+              ELSE
+              /*</div>*/]%%
+              <tr>
+                <td>%%=v(@event)=%%</td>
+                <td>%%=v(@emailName)=%%</td>
+                <td %%=v(@td1class)=%%>%%=v(@didopen)=%%</td>
+                <td %%=v(@td2class)=%%>%%=v(@didclick)=%%</td>
+              </tr>
+              %%[
+              ENDIF
+              next @instance ]%%
+            </table>
+          </div>
+        </div>
+      </div>
+    
+    <div class="sectionTitle">
+          Actions
+    </div>
+      <p>
+        Remove this customer from the unengaged subscribers group.
+      </p>
+      <form method="post" action="%%=CloudPagesURL(3387)=%%">
+        <input type="hidden" name="process" id="process" value="removesupp">
+        <input type="hidden" name="SubscriberKey" id="SubscriberKey" value="%%=v(@SubscriberKey)=%%">
+        <input type="submit" class="smallButton" value="Remove Unengaged Flag">
+      </form><br>
+      <p>
+        Remove this customer from the holdout test group.
+      </p>
+      <form method="post" action="%%=CloudPagesURL(3387)=%%">
+        <input type="hidden" name="process" id="process" value="removeHoldoutTest">
+        <input type="hidden" name="SubscriberKey" id="SubscriberKey" value="%%=v(@SubscriberKey)=%%">
+        <input type="submit" class="smallButton" value="Remove From Holdout Test">
+      </form><br>
+      <p>
+        Reset all possible settings so this customer receives email.
+      </p>
+      <form method="post" action="%%=CloudPagesURL(3387)=%%">
+        <input type="hidden" name="process" id="process" value="resub">
+        <input type="hidden" name="SubscriberKey" id="SubscriberKey" value="%%=v(@SubscriberKey)=%%">
+        <input type="submit" class="smallButton" value="Reset Email Address">
+      </form><br>
+    %%[ENDIF]%%
+  </div>
+  </body>
+</html>
+%%[ENDIF]%%
